@@ -1,5 +1,3 @@
-using MediatR;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -31,17 +29,14 @@ namespace NRestGen.Web
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.IgnoreNullValues = true;
-                    options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
+                    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+#if DEBUG
                     options.JsonSerializerOptions.WriteIndented = true;
+#endif
                 });
 
-            // >>>> Add OData and Mediatr (optional)
-            services.AddOData();
-            services.AddMediatR(typeof(Startup).Assembly);
-
-            // >>>> after gen this becomes available.
-            //ResourceModel = ResourceModelBuilder.Build();
-            //services.AddSingleton(ResourceModel);
+            // >>>> setup NRestGen services
+            services.AddNRestGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,10 +55,8 @@ namespace NRestGen.Web
             {
                 endpoints.MapControllers();
 
-                // >>>> Setup OData
-                endpoints.MapODataRoute("OData", "", ResourceModel);
-                endpoints.EnableDependencyInjection();
-                endpoints.Select().OrderBy().Filter().Count().MaxTop(100);
+                // >>>> Setup NRestGen endpoints
+                endpoints.AddNRestGen();
             });
         }
     }

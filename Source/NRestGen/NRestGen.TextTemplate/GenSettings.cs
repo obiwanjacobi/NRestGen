@@ -12,11 +12,13 @@
             public bool Count { get; set; }
             public int Expand { get; set; }
             public int Max { get; set; }
-            public bool Paging { get; set; }
+            public bool Filter { get; set; }
+            public bool Sort { get; set; }
         }
 
         public class MediatrSettings
         {
+            public bool RegisterAssembly { get; set; }
         }
     }
 }

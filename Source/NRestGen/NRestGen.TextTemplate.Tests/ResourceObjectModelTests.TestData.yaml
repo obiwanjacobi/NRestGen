@@ -2,11 +2,12 @@
   odata:
     queryable: true
     select: true
-    paging: true
+    filter: true
     expand: 1
     count: true
     max: 100
-  mediatr: {}
+  mediatr:
+    register_assembly: true
 entities:
   - name: Customer
     set_name: Customers

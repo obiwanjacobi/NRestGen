@@ -99,6 +99,7 @@ Each link will have:
 - types: supported media-types for the body (optional).
 
 Based on the relations defined in the resource model, GET-links are provided for each related resource type. For `self` also DELETE and PUT are available.
+One-to-many and one-to-one links should be included (navigation properties in model).
 
 > Include these links in the body of the OPTIONS (verb) result?
 
@@ -135,6 +136,8 @@ Options for media-type and security are per Controller (resource type).
 
 Allow for and indirection that allows mapping from resource types to internal data types.
 Allow to not generate for Mediatr.
+Generate a StartUp helper/extension that has the correct config calls for setup.
+    IServiceCollection.AddNRestGen() and IEndpointRouterBuilder.AddOData()
 
 ### Mediatr
 
@@ -166,6 +169,7 @@ Any good?
 ## Similar Tools
 
 https://github.com/mulesoft-labs/raml-dotnet-tools/wiki
+https://github.com/RicoSuter/NSwag
 
 ## Credits
 

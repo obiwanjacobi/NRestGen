@@ -23,9 +23,12 @@ namespace NRestGen.TextTemplate.Tests
             rescObj.Should().NotBeNull();
             rescObj.Entities.Should().HaveCount(2);
             rescObj.Relations.Should().HaveCount(1);
+
             rescObj.Settings.Odata.Should().NotBeNull();
             rescObj.Settings.Odata.Max.Should().Be(100);
             rescObj.Settings.Odata.Queryable.Should().BeTrue();
+
+            rescObj.Settings.Mediatr.RegisterAssembly.Should().BeTrue();
         }
 
         [TestMethod]
@@ -36,7 +39,9 @@ namespace NRestGen.TextTemplate.Tests
                 Settings = new GenSettings
                 {
                     Mediatr = new GenSettings.MediatrSettings
-                    { },
+                    {
+                        RegisterAssembly = true
+                    },
                     Odata = new GenSettings.ODataSettings
                     {
                         Count = true,

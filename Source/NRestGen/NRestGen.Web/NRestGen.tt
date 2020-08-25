@@ -9,7 +9,7 @@
 <#@ import namespace="NRestGen.TextTemplate" #>
 /**********************************************
 <#
-    // >> Note that TextTemplates in Visual Studio are executed on .NET Fx 4!
+    // >> Note that TextTemplates in Visual Studio are executed on .NET4!
     // >> Make sure the `TextTemplatingFileGenerator` is set as `Custom Tool` in file properties (F4).
 
     // change this if your file name is different.
@@ -19,7 +19,6 @@
 
   try {
     var dte = GetDevEnv(Host);
-    //var dte = (EnvDTE.DTE)((IServiceProvider)Host).GetService(typeof(EnvDTE.DTE));
     Initialize(dte, Host, ResourceModelFileName);
     var path = BuildPath("ResourceModel.generated.cs", ResourceModelNamespace);
 #>
@@ -32,7 +31,7 @@ using System.Collections.Generic;
 
 namespace <#=TargetNamespace#>.<#=ResourceModelNamespace#>
 {
-<# foreach(var entity in ResourceModel.Entities) { #>
+<# foreach (var entity in ResourceModel.Entities) { #>
     public sealed partial class <#=entity.Name#>
     {
 <# foreach(var prop in entity.Properties) { #>
@@ -74,14 +73,17 @@ namespace <#=TargetNamespace#>.<#=ResourceModelNamespace#>
     }
 }
 <# MultiFile.EndBlock(); #>
-<# foreach(var entity in ResourceModel.Entities) { 
+<# foreach (var entity in ResourceModel.Entities) { 
     path = BuildPath(entity.SetName + "Controller.generated.cs", ControllerNamespace);
 #>
 Generate Controller: <#=path#>
 <# 
     MultiFile.StartNewFile(path);
 #>
+<# if (UseMediatr) { #>
 using MediatR;
+using NRestGen.Mediatr;
+<# } // if #>
 using Microsoft.AspNet.OData;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -93,22 +95,26 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
 {
     [ApiController]
     [Route("[controller]")]
-    public partial class <#=entity.SetName#>Controller : ODataController //ControllerBase
+    public partial class <#=entity.SetName#>Controller : ControllerBase
     {
+<# if (UseMediatr) { #>
         private readonly IMediator _mediator;
 
         public <#=entity.SetName#>Controller(IMediator mediator)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
+<# } // if #>
 
         [HttpHeadGet("{id?}")]
-        [EnableQuery]
         public async Task<ActionResult<IQueryable<<#=entity.Name#>>>> Get(int? id = null)
         {
+<# if (UseMediatr) { #>
             var request = new GetRequest<<#=entity.Name#>>(id.GetValueOrDefault());
             var response = await _mediator.Send(request);
             return Ok(response.Collection.AsQueryable());
+<# } else { // if #>
+<# } // if-else #>
         }
 <# 
     if (ResourceModel.Relations.ContainsKey(entity.Name)) { 
@@ -117,15 +123,17 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
 #>
         
         [HttpHeadGet("{id}/<#=relation.SetName#>")]
-        [EnableQuery]
         public async Task<IActionResult> Get<#=relation.SetName#>(int id)
         {
+<# if (UseMediatr) { #>
             var request = new GetRequest<<#=relation.Name#>>()
             {
                 ParentId = new ResourceIdentifier(typeof(<#=entity.Name#>), id)
             };
             var response = await _mediator.Send(request);
             return Ok(response.Collection);
+<# } else { // if #>
+<# } // if-else #>
         }
 <# }} // foreach/if #>
     }
@@ -133,6 +141,65 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
 <# 
   MultiFile.EndBlock();
   } // foreach 
+#>
+<# 
+    path = BuildPath("Startup.generated.cs");
+    MultiFile.StartNewFile(path);
+#>
+<# if (UseMediatr) { #>
+using MediatR;
+<# } // if #>
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using <#=TargetNamespace#>.<#=ResourceModelNamespace#>;
+
+namespace <#=TargetNamespace#>
+{
+    public static class StartupExtensions
+    {
+        public static IServiceCollection AddNRestGen(this IServiceCollection services)
+        {
+<# if (UseMediatr &&
+       ResourceModel.Settings.Mediatr.RegisterAssembly) { #>
+            services.AddMediatR(typeof(Startup).Assembly);
+<# } // if #>
+<# if (UseOData) { #>
+            services.AddOData();
+<# } // if #>
+            return services;
+        }
+
+        public static IEndpointRouteBuilder AddNRestGen(this IEndpointRouteBuilder endpoints)
+        {
+<# if (UseOData) { #>
+            var resourceModel = ResourceModelBuilder.Build();
+            endpoints.MapODataRoute("OData", "", resourceModel);
+            endpoints.EnableDependencyInjection();
+            endpoints
+<# if (ResourceModel.Settings.Odata.Select) { #>
+                .Select()
+<# } // if #>
+<# if (ResourceModel.Settings.Odata.Sort) { #>
+                .OrderBy()
+<# } // if #>
+<# if (ResourceModel.Settings.Odata.Filter) { #>
+                .Filter()
+<# } // if #>
+<# if (ResourceModel.Settings.Odata.Count) { #>
+                .Count()
+<# } // if #>
+<# if (ResourceModel.Settings.Odata.Max > 0) { #>
+                .MaxTop(100)
+<# } // if #>
+                ;
+<# } // if #>
+            return endpoints;
+        }
+    }
+}
+<# 
+  MultiFile.EndBlock();
 #>
 <# Process(); #>
 <# } catch(Exception e) { #>
@@ -143,3 +210,14 @@ Error:
   } 
 #>
 *******************************************/
+
+<#+ 
+private bool UseMediatr
+{
+    get { return ResourceModel?.Settings?.Mediatr != null; }
+}
+private bool UseOData
+{
+    get { return ResourceModel?.Settings?.Odata != null; }
+}
+#>
