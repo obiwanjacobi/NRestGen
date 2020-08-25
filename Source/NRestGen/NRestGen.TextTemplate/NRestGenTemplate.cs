@@ -38,7 +38,14 @@ namespace NRestGen.TextTemplate
             {
                 if (String.IsNullOrEmpty(_projectFolder))
                 {
-                    _projectFolder = Path.GetDirectoryName(_host.TemplateFile);
+                    if (MultiFile != null)
+                    {
+                        _projectFolder = MultiFile.ProjectDirectory;
+                    }
+                    else
+                    {
+                        _projectFolder = Path.GetDirectoryName(_host.TemplateFile);
+                    }
                 }
 
                 return _projectFolder;

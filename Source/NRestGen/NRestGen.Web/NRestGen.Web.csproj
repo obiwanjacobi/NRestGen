@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -7,22 +7,6 @@
   <PropertyGroup>
     <TransformOnBuild>false</TransformOnBuild>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="NRestGen.log">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>NRestGen.tt</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="NRestGen.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>NRestGen.tt</DependentUpon>
-    </None>
-  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="MediatR" Version="8.1.0" />
@@ -37,12 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="NRestGen.log">
+    <None Include="..\..\TextTemplates\NRestGen.log">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>NRestGen.tt</DependentUpon>
     </None>
-    <None Update="NRestGen.tt">
+    <None Include="..\..\TextTemplates\NRestGen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>NRestGen.log</LastGenOutput>
     </None>
@@ -51,6 +35,5 @@
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
-
 
 </Project>

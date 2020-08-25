@@ -1,8 +1,8 @@
-﻿using Microsoft.VisualStudio.TextTemplating;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Microsoft.VisualStudio.TextTemplating;
 
 namespace NRestGen.TextTemplate
 {
@@ -75,12 +75,17 @@ namespace NRestGen.TextTemplate
 
         public virtual String GetCustomToolNamespace(String fileName)
         {
-            return null;
+            return String.Empty;
         }
 
         public virtual String DefaultProjectNamespace
         {
-            get { return null; }
+            get { return String.Empty; }
+        }
+
+        public virtual String ProjectDirectory
+        {
+            get { return Path.GetDirectoryName(this.host.TemplateFile); }
         }
 
         protected static bool IsFileContentDifferent(String fileName, String newContent)
@@ -122,6 +127,15 @@ namespace NRestGen.TextTemplate
                 {
                     if (templateProjectItem == null) return String.Empty;
                     return templateProjectItem.ContainingProject.Properties.Item("DefaultNamespace").Value.ToString();
+                }
+            }
+
+            public override String ProjectDirectory
+            {
+                get
+                {
+                    if (templateProjectItem == null) return base.ProjectDirectory;
+                    return Path.GetDirectoryName(templateProjectItem.ContainingProject.FileName);
                 }
             }
 

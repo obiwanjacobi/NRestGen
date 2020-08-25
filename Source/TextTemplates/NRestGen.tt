@@ -45,7 +45,7 @@ namespace <#=TargetNamespace#>.<#=ResourceModelNamespace#>
     MultiFile.EndBlock();
     path = BuildPath("ResourceModelBuilder.generated.cs", ResourceModelNamespace);
 #>
-Generate modelBuilder class: <#=path#>
+Generate ResourceModelBuilder class: <#=path#>
 <# 
     MultiFile.StartNewFile(path);
 #>
@@ -142,8 +142,9 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
   MultiFile.EndBlock();
   } // foreach 
 #>
+<# path = BuildPath("Startup.generated.cs"); #>
+Generate StartupExtensions class: <#=path#>
 <# 
-    path = BuildPath("Startup.generated.cs");
     MultiFile.StartNewFile(path);
 #>
 <# if (UseMediatr) { #>
