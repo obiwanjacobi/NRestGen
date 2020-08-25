@@ -16,13 +16,16 @@ TBD:
 - Caching
 - Validation
 - Search (at resource collection level - based on -any- field values)
-- Service Operations (outside resource model) Allow on instance?
+- Service Operations (outside resource model) Allow on instance?=>NO
 - ETAG / optimistic locking
 - Generate Unit Tests
 - GraphQL?
 - CQRS?
 
 - Look into 'Link Header' RFC 5988 (data paging)
+- CancellationToken during Request processing.
+- OData
+https://github.com/OData/AspNetCoreOData/blob/master/sample/ODataRoutingSample/Startup.cs
 
 ## Conventions
 
@@ -74,6 +77,7 @@ The generated URIs all follow the following convention:
     - PUT is a synchronous upsert. Location header.
     - PATCH is a merge.
     - HEAD for large binary responses (images/documents) - will not be included in standard response if on resource type. Support Accept-Range header for partial gets (206)?
+    - OPTIONS for link table
 
 - Status URI for accessing the progress of async calls.
     - IAsyncOperationStatus interface to be implemented - imported by StatusController.
@@ -150,14 +154,21 @@ Any good?
 - ResourceModel: Binary Properties that have to queried separately (partial responses?).
 - Target locations (Projects/Folders) -and naming- for Resource Model classes and Controller classes
 - Use Mediatr (on/off)
-- Enable OData (on/off)
+- Enable OData (EnableQuery, ParseQueryString or Off)
 - Link table as response of OPTIONS
 - version strategy (url/header/media-type)
 - error reporting strategy
 - Security settings
 - validation strategy (Fluent Validation?)
 - ResourceModel <=> Internal/domain mapping
+- Swagger: https://channel9.msdn.com/Shows/On-NET/Adding-a-little-Swagger-to-OData?WT.mc_id=channel9-twitter-cda
 
 ## Similar Tools
 
 https://github.com/mulesoft-labs/raml-dotnet-tools/wiki
+
+## Credits
+
+T4 Multiple File Manager
+https://github.com/damieng/DamienGKit
+https://damieng.com/blog/2009/11/06/multiple-outputs-from-t4-made-easy-revisited

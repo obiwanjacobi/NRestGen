@@ -1,0 +1,26 @@
+﻿settings:
+  odata:
+    queryable: true
+    select: true
+    paging: true
+    expand: 1
+    count: true
+    max: 100
+  mediatr: {}
+entities:
+  - name: Customer
+    set_name: Customers
+    properties:
+      - name: CustomerId
+        type: int
+      - name: Name
+        type: string
+      - name: Orders
+        type: List<Order>
+  - name: Order
+    set_name: Orders
+    properties:
+      - name: OrderId
+        type: int
+      - name: CustomerId
+        type: int

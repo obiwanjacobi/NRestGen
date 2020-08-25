@@ -1,0 +1,40 @@
+﻿settings:
+  odata:
+    queryable: true
+    select: true
+    paging: true
+    expand: 1
+    count: true
+    max: 100
+  mediatr:
+    support: true
+entities:
+  - name: Customer
+    set_name: Customers
+    properties:
+    - name: CustomerId
+      type: int
+    - name: Name
+      type: string
+    - name: Orders
+      type: IEnumerable<Order>
+  - name: Order
+    set_name: Orders
+    properties:
+    - name: OrderId
+      type: int
+    - name: CustomerId
+      type: int
+    - name: OrderLines
+      type: IEnumerable<OrderLine>
+  - name: OrderLine
+    set_name: OrderLines
+    properties:
+    - name: OrderId
+      type: int
+    - name: OrderLineId
+      type: int
+    - name: ProductId
+      type: int
+    - name: Quantity
+      type: int

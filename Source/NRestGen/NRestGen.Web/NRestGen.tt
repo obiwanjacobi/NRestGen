@@ -1,0 +1,145 @@
+﻿<#@ template debug="true" hostspecific="true" language="C#" inherits="NRestGen.TextTemplate.NRestGenTemplate" #>
+<#@ output extension=".log" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Runtime" #>
+<#@ assembly name="$(TargetDir)NRestGen.TextTemplate.dll" #>
+<#@ assembly name="EnvDTE"#>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="NRestGen.TextTemplate" #>
+/**********************************************
+<#
+    // >> Note that TextTemplates in Visual Studio are executed on .NET Fx 4!
+    // >> Make sure the `TextTemplatingFileGenerator` is set as `Custom Tool` in file properties (F4).
+
+    // change this if your file name is different.
+    const string ResourceModelFileName = "ResourceModel.yaml";
+    const string ResourceModelNamespace = "ResourceModel";
+    const string ControllerNamespace = "Controllers";
+
+  try {
+    var dte = GetDevEnv(Host);
+    //var dte = (EnvDTE.DTE)((IServiceProvider)Host).GetService(typeof(EnvDTE.DTE));
+    Initialize(dte, Host, ResourceModelFileName);
+    var path = BuildPath("ResourceModel.generated.cs", ResourceModelNamespace);
+#>
+Generating Resource Model classes: <#=path#>
+<# 
+    MultiFile.StartNewFile(path);
+#>
+using System;
+using System.Collections.Generic;
+
+namespace <#=TargetNamespace#>.<#=ResourceModelNamespace#>
+{
+<# foreach(var entity in ResourceModel.Entities) { #>
+    public sealed partial class <#=entity.Name#>
+    {
+<# foreach(var prop in entity.Properties) { #>
+        public <#=prop.Type#> <#=prop.Name#> { get; set; }
+<# } // for each #>
+    }
+
+<# } // for each #>
+}
+<#
+    MultiFile.EndBlock();
+    path = BuildPath("ResourceModelBuilder.generated.cs", ResourceModelNamespace);
+#>
+Generate modelBuilder class: <#=path#>
+<# 
+    MultiFile.StartNewFile(path);
+#>
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.OData.Edm;
+
+namespace <#=TargetNamespace#>.<#=ResourceModelNamespace#>
+{
+    public static partial class ResourceModelBuilder
+    {
+        public static IEdmModel Build()
+        {
+            var builder = new ODataConventionModelBuilder
+            {
+                Namespace = "<#=TargetNamespace#>.<#=ResourceModelNamespace#>"
+            };
+            builder.EnableLowerCamelCase();
+
+<# foreach(var entity in ResourceModel.Entities) { #>
+            builder.EntitySet<<#=entity.Name#>>("<#=entity.SetName#>");
+<# } // for each #>
+
+            return builder.GetEdmModel();
+        }
+    }
+}
+<# MultiFile.EndBlock(); #>
+<# foreach(var entity in ResourceModel.Entities) { 
+    path = BuildPath(entity.SetName + "Controller.generated.cs", ControllerNamespace);
+#>
+Generate Controller: <#=path#>
+<# 
+    MultiFile.StartNewFile(path);
+#>
+using MediatR;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using <#=TargetNamespace#>.<#=ResourceModelNamespace#>;
+
+namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
+{
+    [ApiController]
+    [Route("[controller]")]
+    public partial class <#=entity.SetName#>Controller : ODataController //ControllerBase
+    {
+        private readonly IMediator _mediator;
+
+        public <#=entity.SetName#>Controller(IMediator mediator)
+        {
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        }
+
+        [HttpHeadGet("{id?}")]
+        [EnableQuery]
+        public async Task<ActionResult<IQueryable<<#=entity.Name#>>>> Get(int? id = null)
+        {
+            var request = new GetRequest<<#=entity.Name#>>(id.GetValueOrDefault());
+            var response = await _mediator.Send(request);
+            return Ok(response.Collection.AsQueryable());
+        }
+<# 
+    if (ResourceModel.Relations.ContainsKey(entity.Name)) { 
+    var relations = ResourceModel.Relations[entity.Name];
+    foreach(var relation in relations) {
+#>
+        
+        [HttpHeadGet("{id}/<#=relation.SetName#>")]
+        [EnableQuery]
+        public async Task<IActionResult> Get<#=relation.SetName#>(int id)
+        {
+            var request = new GetRequest<<#=relation.Name#>>()
+            {
+                ParentId = new ResourceIdentifier(typeof(<#=entity.Name#>), id)
+            };
+            var response = await _mediator.Send(request);
+            return Ok(response.Collection);
+        }
+<# }} // foreach/if #>
+    }
+}
+<# 
+  MultiFile.EndBlock();
+  } // foreach 
+#>
+<# Process(); #>
+<# } catch(Exception e) { #>
+Error:
+<#=e.ToString()#>
+<# 
+  Error(e.ToString());
+  } 
+#>
+*******************************************/
