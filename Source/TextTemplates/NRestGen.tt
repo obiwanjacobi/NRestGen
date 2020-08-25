@@ -1,22 +1,26 @@
-﻿<#@ template debug="true" hostspecific="true" language="C#" inherits="NRestGen.NRestGenTemplate" #>
+﻿<#@ template debug="true" hostspecific="true" language="C#" inherits="NRestGen.TextTemplate.NRestGenTemplate" #>
 <#@ output extension=".log" #>
 <#@ assembly name="System.Core" #>
 <#@ assembly name="System.Runtime" #>
-<#@ assembly name="$(TargetDir)NRestGen.dll" #>
+<#@ assembly name="$(TargetDir)NRestGen.TextTemplate.dll" #>
 <#@ assembly name="EnvDTE"#>
 <#@ import namespace="System" #>
 <#@ import namespace="System.IO" #>
-<#@ import namespace="RestGen" #>
+<#@ import namespace="NRestGen.TextTemplate" #>
 /**********************************************
 <#
+    // >> Note that TextTemplates in Visual Studio are executed on .NET4!
+    // >> Make sure the `TextTemplatingFileGenerator` is set as `Custom Tool` in file properties (F4).
+
     // change this if your file name is different.
     const string ResourceModelFileName = "ResourceModel.yaml";
+    const string ResourceModelNamespace = "ResourceModel";
+    const string ControllerNamespace = "Controllers";
 
   try {
     var dte = GetDevEnv(Host);
-    //var dte = (EnvDTE.DTE)((IServiceProvider)Host).GetService(typeof(EnvDTE.DTE));
     Initialize(dte, Host, ResourceModelFileName);
-    var path = BuildPath("ResourceModel.generated.cs");
+    var path = BuildPath("ResourceModel.generated.cs", ResourceModelNamespace);
 #>
 Generating Resource Model classes: <#=path#>
 <# 
@@ -25,9 +29,9 @@ Generating Resource Model classes: <#=path#>
 using System;
 using System.Collections.Generic;
 
-namespace <#=TargetNamespace#>
+namespace <#=TargetNamespace#>.<#=ResourceModelNamespace#>
 {
-<# foreach(var entity in ResourceModel.Entities) { #>
+<# foreach (var entity in ResourceModel.Entities) { #>
     public sealed partial class <#=entity.Name#>
     {
 <# foreach(var prop in entity.Properties) { #>
@@ -39,7 +43,7 @@ namespace <#=TargetNamespace#>
 }
 <#
     MultiFile.EndBlock();
-    path = BuildPath("ResourceModelBuilder.generated.cs");
+    path = BuildPath("ResourceModelBuilder.generated.cs", ResourceModelNamespace);
 #>
 Generate modelBuilder class: <#=path#>
 <# 
@@ -48,7 +52,7 @@ Generate modelBuilder class: <#=path#>
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 
-namespace <#=TargetNamespace#>
+namespace <#=TargetNamespace#>.<#=ResourceModelNamespace#>
 {
     public static partial class ResourceModelBuilder
     {
@@ -56,7 +60,7 @@ namespace <#=TargetNamespace#>
         {
             var builder = new ODataConventionModelBuilder
             {
-                Namespace = "<#=TargetNamespace#>"
+                Namespace = "<#=TargetNamespace#>.<#=ResourceModelNamespace#>"
             };
             builder.EnableLowerCamelCase();
 
@@ -69,40 +73,48 @@ namespace <#=TargetNamespace#>
     }
 }
 <# MultiFile.EndBlock(); #>
-<# foreach(var entity in ResourceModel.Entities) { 
-    path = BuildPath(entity.SetName + "Controller.generated.cs", "Controllers");
+<# foreach (var entity in ResourceModel.Entities) { 
+    path = BuildPath(entity.SetName + "Controller.generated.cs", ControllerNamespace);
 #>
 Generate Controller: <#=path#>
 <# 
     MultiFile.StartNewFile(path);
 #>
+<# if (UseMediatr) { #>
 using MediatR;
+using NRestGen.Mediatr;
+<# } // if #>
 using Microsoft.AspNet.OData;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using <#=TargetNamespace#>.<#=ResourceModelNamespace#>;
 
-namespace <#=TargetNamespace#>
+namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
 {
     [ApiController]
     [Route("[controller]")]
-    public partial class <#=entity.SetName#>Controller : ODataController //ControllerBase
+    public partial class <#=entity.SetName#>Controller : ControllerBase
     {
+<# if (UseMediatr) { #>
         private readonly IMediator _mediator;
 
         public <#=entity.SetName#>Controller(IMediator mediator)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
+<# } // if #>
 
         [HttpHeadGet("{id?}")]
-        [EnableQuery]
         public async Task<ActionResult<IQueryable<<#=entity.Name#>>>> Get(int? id = null)
         {
+<# if (UseMediatr) { #>
             var request = new GetRequest<<#=entity.Name#>>(id.GetValueOrDefault());
             var response = await _mediator.Send(request);
             return Ok(response.Collection.AsQueryable());
+<# } else { // if #>
+<# } // if-else #>
         }
 <# 
     if (ResourceModel.Relations.ContainsKey(entity.Name)) { 
@@ -111,15 +123,17 @@ namespace <#=TargetNamespace#>
 #>
         
         [HttpHeadGet("{id}/<#=relation.SetName#>")]
-        [EnableQuery]
         public async Task<IActionResult> Get<#=relation.SetName#>(int id)
         {
+<# if (UseMediatr) { #>
             var request = new GetRequest<<#=relation.Name#>>()
             {
                 ParentId = new ResourceIdentifier(typeof(<#=entity.Name#>), id)
             };
             var response = await _mediator.Send(request);
             return Ok(response.Collection);
+<# } else { // if #>
+<# } // if-else #>
         }
 <# }} // foreach/if #>
     }
@@ -127,6 +141,67 @@ namespace <#=TargetNamespace#>
 <# 
   MultiFile.EndBlock();
   } // foreach 
+#>
+<# 
+    path = BuildPath("Startup.generated.cs");
+    MultiFile.StartNewFile(path);
+#>
+<# if (UseMediatr) { #>
+using MediatR;
+<# } // if #>
+<# if (UseOData) { #>
+using Microsoft.AspNet.OData.Extensions;
+using <#=TargetNamespace#>.<#=ResourceModelNamespace#>;
+<# } // if #>
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace <#=TargetNamespace#>
+{
+    public static class StartupExtensions
+    {
+        public static IServiceCollection AddNRestGen(this IServiceCollection services)
+        {
+<# if (UseMediatr &&
+       ResourceModel.Settings.Mediatr.RegisterAssembly) { #>
+            services.AddMediatR(typeof(Startup).Assembly);
+<# } // if #>
+<# if (UseOData) { #>
+            services.AddOData();
+<# } // if #>
+            return services;
+        }
+
+        public static IEndpointRouteBuilder AddNRestGen(this IEndpointRouteBuilder endpoints)
+        {
+<# if (UseOData) { #>
+            var resourceModel = ResourceModelBuilder.Build();
+            endpoints.MapODataRoute("OData", "", resourceModel);
+            endpoints.EnableDependencyInjection();
+            endpoints
+<# if (ResourceModel.Settings.Odata.Select) { #>
+                .Select()
+<# } // if #>
+<# if (ResourceModel.Settings.Odata.Sort) { #>
+                .OrderBy()
+<# } // if #>
+<# if (ResourceModel.Settings.Odata.Filter) { #>
+                .Filter()
+<# } // if #>
+<# if (ResourceModel.Settings.Odata.Count) { #>
+                .Count()
+<# } // if #>
+<# if (ResourceModel.Settings.Odata.Max > 0) { #>
+                .MaxTop(100)
+<# } // if #>
+                ;
+<# } // if #>
+            return endpoints;
+        }
+    }
+}
+<# 
+  MultiFile.EndBlock();
 #>
 <# Process(); #>
 <# } catch(Exception e) { #>
@@ -137,3 +212,14 @@ Error:
   } 
 #>
 *******************************************/
+
+<#+ 
+private bool UseMediatr
+{
+    get { return ResourceModel?.Settings?.Mediatr != null; }
+}
+private bool UseOData
+{
+    get { return ResourceModel?.Settings?.Odata != null; }
+}
+#>

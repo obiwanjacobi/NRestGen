@@ -149,10 +149,12 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
 <# if (UseMediatr) { #>
 using MediatR;
 <# } // if #>
+<# if (UseOData) { #>
 using Microsoft.AspNet.OData.Extensions;
+using <#=TargetNamespace#>.<#=ResourceModelNamespace#>;
+<# } // if #>
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using <#=TargetNamespace#>.<#=ResourceModelNamespace#>;
 
 namespace <#=TargetNamespace#>
 {
