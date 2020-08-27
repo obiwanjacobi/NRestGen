@@ -29,6 +29,9 @@ namespace NRestGen.TextTemplate.Tests
             rescObj.Settings.Odata.Queryable.Should().BeTrue();
 
             rescObj.Settings.Mediatr.RegisterAssembly.Should().BeTrue();
+
+            rescObj.Settings.Api.BaseUrl.Should().Be("api");
+            rescObj.Settings.Api.Version.Should().Be("1");
         }
 
         [TestMethod]

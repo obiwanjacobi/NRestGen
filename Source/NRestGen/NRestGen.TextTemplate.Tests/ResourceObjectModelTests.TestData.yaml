@@ -8,6 +8,9 @@
     max: 100
   mediatr:
     register_assembly: true
+  api:
+    version: 1
+    base_url: api
 entities:
   - name: Customer
     set_name: Customers
