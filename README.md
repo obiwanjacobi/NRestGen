@@ -15,17 +15,29 @@ TBD:
 - Security
 - Caching
 - Validation
+- Aggregates (auto-expand)
 - Search (at resource collection level - based on -any- field values)
 - Service Operations (outside resource model) Allow on instance?=>NO
 - ETAG / optimistic locking
 - Generate Unit Tests
+- Generate DocComments on Controllers to include in Swagger.
+- Generate `[Produces]` attributes on Controllers.
 - GraphQL?
 - CQRS?
+- Batch: https://devblogs.microsoft.com/odata/all-in-one-with-odata-batch/?WT.mc_id=ondotnet-c9-cephilli
 
 - Look into 'Link Header' RFC 5988 (data paging)
 - CancellationToken during Request processing.
 - OData
 https://github.com/OData/AspNetCoreOData/blob/master/sample/ODataRoutingSample/Startup.cs
+
+ISSUES:
+- OData does not seem to like versioned paths!?
+    Exception thrown: 'Microsoft.OData.UriParser.ODataUnrecognizedPathException' in Microsoft.AspNetCore.OData.dll
+    Exception thrown: 'System.NullReferenceException' in Microsoft.AspNetCore.Mvc.Versioning.dll
+    Object reference not set to an instance of an object.
+    https://channel9.msdn.com/Shows/On-NET/Adding-a-little-Swagger-to-OData
+https://github.com/microsoft/aspnet-api-versioning/tree/master/samples/aspnetcore/SwaggerODataSample
 
 ## Conventions
 

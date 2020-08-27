@@ -2,6 +2,8 @@
 {
     public sealed class GenSettings
     {
+        public ApiSettings Api { get; set; }
+
         public ODataSettings Odata { get; set; }
         public MediatrSettings Mediatr { get; set; }
 
@@ -19,6 +21,12 @@
         public class MediatrSettings
         {
             public bool RegisterAssembly { get; set; }
+        }
+
+        public class ApiSettings
+        {
+            public string Version { get; set; }
+            public string BaseUrl { get; set; }
         }
     }
 }

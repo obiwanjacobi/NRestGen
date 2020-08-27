@@ -84,7 +84,9 @@ Generate Controller: <#=path#>
 using MediatR;
 using NRestGen.Mediatr;
 <# } // if #>
+<# if (UseOData) { #>
 using Microsoft.AspNet.OData;
+<# } // if #>
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
@@ -94,7 +96,9 @@ using <#=TargetNamespace#>.<#=ResourceModelNamespace#>;
 namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
 {
     [ApiController]
-    [Route("[controller]")]
+    [ApiVersion("<#=ResourceModel.Settings.Api.Version#>")]
+    //[Route("<#=ResourceModel.Settings.Api.BaseUrl#>/v{v:apiVersion}/[controller]")]
+    [Route("<#=ResourceModel.Settings.Api.BaseUrl#>/[controller]")]
     public partial class <#=entity.SetName#>Controller : ControllerBase
     {
 <# if (UseMediatr) { #>
@@ -177,7 +181,7 @@ namespace <#=TargetNamespace#>
         {
 <# if (UseOData) { #>
             var resourceModel = ResourceModelBuilder.Build();
-            endpoints.MapODataRoute("OData", "", resourceModel);
+            endpoints.MapODataRoute("OData", "<#=ResourceModel.Settings.Api.BaseUrl#>", resourceModel);
             endpoints.EnableDependencyInjection();
             endpoints
 <# if (ResourceModel.Settings.Odata.Select) { #>
