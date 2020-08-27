@@ -32,11 +32,6 @@ namespace NRestGen.TextTemplate
                     {
                         AddRelation(relations, srcEntity, entity);
                     }
-
-                    //if (NameIsEntityReference(entity, prop.Name))
-                    //{
-                    //    AddRelation(relations, entity, srcEntity);
-                    //}
                 }
             }
         }
@@ -60,7 +55,7 @@ namespace NRestGen.TextTemplate
         {
             // IEnumerable<EntityT>
             // List<EntityT>
-            return type.Contains(entity.Name);
+            return type.Contains($"<{entity.Name}>");
         }
 
         private static bool NameIsEntityReference(ResourceEntity entity, string name)
