@@ -3,7 +3,7 @@
     public class Request<ResourceT>
         where ResourceT : class
     {
-        protected Request(int id)
+        public Request(int id = 0)
         {
             Identifier = new ResourceIdentifier(typeof(ResourceT), id);
         }

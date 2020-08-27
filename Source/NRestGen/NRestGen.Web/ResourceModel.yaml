@@ -6,8 +6,8 @@
     expand: 1
     count: true
     max: 100
-  mediatr:
-    register_assembly: true
+#  mediatr:
+#    register_assembly: true
   api:
     version: 1
     base_url: api

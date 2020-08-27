@@ -15,7 +15,7 @@ TBD:
 - Security
 - Caching
 - Validation
-- Aggregates (auto-expand)
+- Aggregates (auto-expand) Or is that a function of the Handler?
 - Search (at resource collection level - based on -any- field values)
 - Service Operations (outside resource model) Allow on instance?=>NO
 - ETAG / optimistic locking

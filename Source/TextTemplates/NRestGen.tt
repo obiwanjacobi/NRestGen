@@ -118,6 +118,9 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
             var response = await _mediator.Send(request);
             return Ok(response.Collection.AsQueryable());
 <# } else { // if #>
+            var request = new Request<<#=entity.Name#>>(id.GetValueOrDefault());
+            var response = await Handle(request);
+            return Ok(response.Collection.AsQueryable());
 <# } // if-else #>
         }
 <# 
@@ -137,6 +140,12 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
             var response = await _mediator.Send(request);
             return Ok(response.Collection);
 <# } else { // if #>
+            var request = new Request<<#=relation.Name#>>()
+            {
+                ParentId = new ResourceIdentifier(typeof(<#=entity.Name#>), id)
+            };
+            var response = await Handle(request);
+            return Ok(response.Collection);
 <# } // if-else #>
         }
 <# }} // foreach/if #>
@@ -146,6 +155,49 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
   MultiFile.EndBlock();
   } // foreach 
 #>
+<# if (!UseMediatr) { #>
+<# foreach (var entity in ResourceModel.Entities) { 
+    path = BuildPath(entity.SetName + "Controller.cs", ControllerNamespace);
+#>
+Generate Controller implementation: <#=path#>
+<# 
+    MultiFile.StartNewFile(path, FileCreationMode.NotExists);
+#>
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using <#=TargetNamespace#>.<#=ResourceModelNamespace#>;
+
+namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
+{
+    /// <summary>
+    /// Implementation of the <#=entity.Name#> controller handlers.
+    /// </summary>
+    public partial class <#=entity.SetName#>Controller : ControllerBase
+    {
+        public Task<Response<<#=entity.Name#>>> Handle(Request<<#=entity.Name#>> request)
+        {
+            throw new NotImplementedException();
+        }
+<# 
+    if (ResourceModel.Relations.ContainsKey(entity.Name)) { 
+    var relations = ResourceModel.Relations[entity.Name];
+    foreach(var relation in relations) {
+#>
+        
+        public Task<Response<<#=relation.Name#>>> Handle(Request<<#=relation.Name#>> request)
+        {
+            throw new NotImplementedException();
+        }
+<# }} // foreach/if #>
+    }
+}
+<# 
+  MultiFile.EndBlock();
+  } // foreach 
+#>
+<# } // if !UseMediatr #>
 <# path = BuildPath("Startup.generated.cs"); #>
 Generate StartupExtensions class: <#=path#>
 <# 

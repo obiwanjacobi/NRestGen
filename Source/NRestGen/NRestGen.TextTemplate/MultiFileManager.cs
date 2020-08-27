@@ -9,12 +9,20 @@ namespace NRestGen.TextTemplate
     // https://raw.github.com/damieng/DamienGKit
     // http://damieng.com/blog/2009/11/06/multiple-outputs-from-t4-made-easy-revisited
 
+    public enum FileCreationMode
+    {
+        Diff,
+        NotExists,
+    }
+
     // MultiFileManager class records the various blocks so it can split them up
     public class MultiFileManager
     {
         private class Block
         {
             public String Name;
+            public FileCreationMode FileMode;
+            public bool InlcudeHeader;
             public int Start;
             public int Length;
         }
@@ -34,10 +42,10 @@ namespace NRestGen.TextTemplate
 
         public string Header { get; set; }
 
-        public void StartNewFile(String name)
+        public void StartNewFile(String name, FileCreationMode fileMode = FileCreationMode.Diff)
         {
             if (name == null) { throw new ArgumentNullException(nameof(name)); }
-            CurrentBlock = new Block { Name = name };
+            CurrentBlock = new Block { Name = name, FileMode = fileMode, InlcudeHeader = fileMode == FileCreationMode.Diff };
         }
 
         public void EndBlock()
@@ -59,18 +67,47 @@ namespace NRestGen.TextTemplate
                 foreach (Block block in files)
                 {
                     String fileName = Path.Combine(outputPath, block.Name);
-                    String content = Header + template.ToString(block.Start, block.Length);
-                    generatedFileNames.Add(fileName);
-                    CreateFile(fileName, content);
+                    String content = String.Empty;
+                    if (block.InlcudeHeader) content = Header;
+                    content += template.ToString(block.Start, block.Length);
+
+                    if (CreateFile(block.FileMode, fileName, content))
+                        generatedFileNames.Add(fileName);
                     template.Remove(block.Start, block.Length);
                 }
             }
         }
 
-        protected virtual void CreateFile(String fileName, String content)
+        private bool CreateFile(FileCreationMode fileMode, string fileName, string content)
+        {
+            switch (fileMode)
+            {
+                case FileCreationMode.NotExists:
+                    return CreateFileIfNotExists(fileName, content);
+                //case FileMode.Diff:
+                default:
+                    return CreateFileIfDiff(fileName, content);
+            }
+        }
+
+        protected virtual bool CreateFileIfNotExists(String fileName, String content)
+        {
+            if (!File.Exists(fileName))
+            {
+                File.WriteAllText(fileName, content);
+                return true;
+            }
+            return false;
+        }
+
+        protected virtual bool CreateFileIfDiff(String fileName, String content)
         {
             if (IsFileContentDifferent(fileName, content))
+            {
                 File.WriteAllText(fileName, content);
+                return true;
+            }
+            return false;
         }
 
         public virtual String GetCustomToolNamespace(String fileName)
@@ -156,36 +193,36 @@ namespace NRestGen.TextTemplate
                     projectSyncAction(generatedFileNames);
             }
 
-            protected override void CreateFile(String fileName, String content)
+            protected override bool CreateFileIfNotExists(String fileName, String content)
+            {
+                if (!File.Exists(fileName))
+                {
+                    CheckoutFileIfRequired(fileName);
+                    File.WriteAllText(fileName, content);
+                    return true;
+                }
+                return false;
+            }
+
+            protected override bool CreateFileIfDiff(String fileName, String content)
             {
                 if (IsFileContentDifferent(fileName, content))
                 {
                     CheckoutFileIfRequired(fileName);
                     File.WriteAllText(fileName, content);
+                    return true;
                 }
+                return false;
             }
 
             internal VSManager(EnvDTE.DTE dte, ITextTemplatingEngineHost host, StringBuilder template)
                 : base(host, template)
             {
-                //var hostServiceProvider = (IServiceProvider)host;
-                //if (hostServiceProvider == null)
-                //    throw new ArgumentException("Could not obtain IServiceProvider");
+                this.dte = dte ?? throw new ArgumentNullException(nameof(dte), "EnvDTE.DTE must be specified.");
 
-                // TODO: This throws an exception when running in VS!?
-                // But not when debugguing...
-                // dte = (EnvDTE.DTE)hostServiceProvider.GetService(typeof(EnvDTE.DTE));
-
-                this.dte = dte;
-                //if (this.dte == null)
-                //    throw new ArgumentException("Could not obtain DTE from host");
-
-                if (this.dte != null)
-                {
-                    templateProjectItem = dte.Solution.FindProjectItem(host.TemplateFile);
-                    checkOutAction = fileName => dte.SourceControl.CheckOutItem(fileName);
-                    projectSyncAction = keepFileNames => ProjectSync(templateProjectItem, keepFileNames);
-                }
+                templateProjectItem = dte.Solution.FindProjectItem(host.TemplateFile);
+                checkOutAction = fileName => dte.SourceControl.CheckOutItem(fileName);
+                projectSyncAction = keepFileNames => ProjectSync(templateProjectItem, keepFileNames);
             }
 
             private static void ProjectSync(EnvDTE.ProjectItem templateProjectItem, List<String> keepFileNames)

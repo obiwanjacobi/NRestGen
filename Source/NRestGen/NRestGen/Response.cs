@@ -4,6 +4,9 @@ namespace NRestGen
 {
     public class Response<ResourceT>
     {
+        public Response()
+        { }
+
         public Response(IEnumerable<ResourceT> collection)
         {
             Collection = collection;
@@ -14,6 +17,6 @@ namespace NRestGen
             Collection = new[] { instance };
         }
 
-        public IEnumerable<ResourceT> Collection { get; private set; }
+        public IEnumerable<ResourceT> Collection { get; set; }
     }
 }
