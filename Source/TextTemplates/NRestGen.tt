@@ -36,10 +36,10 @@ namespace <#=TargetNamespace#>.<#=ResourceModelNamespace#>
     {
 <# foreach(var prop in entity.Properties) { #>
         public <#=prop.Type#> <#=prop.Name#> { get; set; }
-<# } // for each #>
+<# } // foreach-prop #>
     }
 
-<# } // for each #>
+<# } // foreach-entity #>
 }
 <#
     MultiFile.EndBlock();
@@ -66,7 +66,7 @@ namespace <#=TargetNamespace#>.<#=ResourceModelNamespace#>
 
 <# foreach(var entity in ResourceModel.Entities) { #>
             builder.EntitySet<<#=entity.Name#>>("<#=entity.SetName#>");
-<# } // for each #>
+<# } // foreach-entity #>
 
             return builder.GetEdmModel();
         }
@@ -80,13 +80,13 @@ Generate Controller: <#=path#>
 <# 
     MultiFile.StartNewFile(path);
 #>
-<# if (UseMediatr) { #>
+<#  if (UseMediatr) { #>
 using MediatR;
 using NRestGen.Mediatr;
-<# } // if #>
-<# if (UseOData) { #>
+<#  } // if #>
+<#  if (UseOData) { #>
 using Microsoft.AspNet.OData;
-<# } // if #>
+<#  } // if #>
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
@@ -95,33 +95,39 @@ using <#=TargetNamespace#>.<#=ResourceModelNamespace#>;
 
 namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
 {
+    /// <summary>
+    /// Handles resource requests for the <#=entity.Name#> type.
+    /// </summary>
     [ApiController]
     [ApiVersion("<#=ResourceModel.Settings.Api.Version#>")]
     //[Route("<#=ResourceModel.Settings.Api.BaseUrl#>/v{v:apiVersion}/[controller]")]
     [Route("<#=ResourceModel.Settings.Api.BaseUrl#>/[controller]")]
     public partial class <#=entity.SetName#>Controller : ControllerBase
     {
-<# if (UseMediatr) { #>
+<#  if (UseMediatr) { #>
         private readonly IMediator _mediator;
 
         public <#=entity.SetName#>Controller(IMediator mediator)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
-<# } // if #>
+<#  } // if #>
 
         [HttpHeadGet("{id?}")]
-        public async Task<ActionResult<IQueryable<<#=entity.Name#>>>> Get(int? id = null)
+        public async Task<IActionResult> Get(int? id = null)
         {
-<# if (UseMediatr) { #>
+<#  if (UseMediatr) { #>
             var request = new GetRequest<<#=entity.Name#>>(id.GetValueOrDefault());
             var response = await _mediator.Send(request);
-            return Ok(response.Collection.AsQueryable());
-<# } else { // if #>
+<#  } else { #>
             var request = new Request<<#=entity.Name#>>(id.GetValueOrDefault());
             var response = await Handle(request);
+<#  } // if-else UseMediatr #>
+<#  if (UseOData && ResourceModel.Settings.Odata.Queryable) { #>
             return Ok(response.Collection.AsQueryable());
-<# } // if-else #>
+<#  } else { #>
+            return Ok(response.Collection);
+<#  } // if-else #>
         }
 <# 
     if (ResourceModel.Relations.ContainsKey(entity.Name)) { 
@@ -132,35 +138,35 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
         [HttpHeadGet("{id}/<#=relation.SetName#>")]
         public async Task<IActionResult> Get<#=relation.SetName#>(int id)
         {
-<# if (UseMediatr) { #>
+<#    if (UseMediatr) { #>
             var request = new GetRequest<<#=relation.Name#>>()
             {
                 ParentId = new ResourceIdentifier(typeof(<#=entity.Name#>), id)
             };
             var response = await _mediator.Send(request);
-            return Ok(response.Collection);
-<# } else { // if #>
+<#    } else { #>
             var request = new Request<<#=relation.Name#>>()
             {
                 ParentId = new ResourceIdentifier(typeof(<#=entity.Name#>), id)
             };
             var response = await Handle(request);
+<#    } // if-else #>
+<#    if (UseOData && ResourceModel.Settings.Odata.Queryable) { #>
+            return Ok(response.Collection.AsQueryable());
+<#    } else { #>
             return Ok(response.Collection);
-<# } // if-else #>
+<#    } // if-else #>
         }
-<# }} // foreach/if #>
+<#  }} // foreach-relation/if #>
     }
 }
 <# 
   MultiFile.EndBlock();
-  } // foreach 
+  } // foreach-entity
 #>
 <# if (!UseMediatr) { #>
 <# foreach (var entity in ResourceModel.Entities) { 
     path = BuildPath(entity.SetName + "Controller.cs", ControllerNamespace);
-#>
-Generate Controller implementation: <#=path#>
-<# 
     MultiFile.StartNewFile(path, FileCreationMode.NotExists);
 #>
 using Microsoft.AspNetCore.Mvc;
@@ -195,9 +201,9 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
 }
 <# 
   MultiFile.EndBlock();
-  } // foreach 
+  } // foreach-entity
 #>
-<# } // if !UseMediatr #>
+<# } // if-!UseMediatr #>
 <# path = BuildPath("Startup.generated.cs"); #>
 Generate StartupExtensions class: <#=path#>
 <# 
@@ -236,21 +242,21 @@ namespace <#=TargetNamespace#>
             endpoints.MapODataRoute("OData", "<#=ResourceModel.Settings.Api.BaseUrl#>", resourceModel);
             endpoints.EnableDependencyInjection();
             endpoints
-<# if (ResourceModel.Settings.Odata.Select) { #>
+<#  if (ResourceModel.Settings.Odata.Select) { #>
                 .Select()
-<# } // if #>
-<# if (ResourceModel.Settings.Odata.Sort) { #>
+<#  } // if #>
+<#  if (ResourceModel.Settings.Odata.Sort) { #>
                 .OrderBy()
-<# } // if #>
-<# if (ResourceModel.Settings.Odata.Filter) { #>
+<#  } // if #>
+<#  if (ResourceModel.Settings.Odata.Filter) { #>
                 .Filter()
-<# } // if #>
-<# if (ResourceModel.Settings.Odata.Count) { #>
+<#  } // if #>
+<#  if (ResourceModel.Settings.Odata.Count) { #>
                 .Count()
-<# } // if #>
-<# if (ResourceModel.Settings.Odata.Max > 0) { #>
+<#  } // if #>
+<#  if (ResourceModel.Settings.Odata.Max > 0) { #>
                 .MaxTop(100)
-<# } // if #>
+<#  } // if #>
                 ;
 <# } // if #>
             return endpoints;
