@@ -97,6 +97,7 @@ using MediatR;
 <#  } // if #>
 <#  if (UseOData) { #>
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Query;
 <#  } // if #>
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -125,20 +126,23 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
 <#  } // if #>
 
         [HttpHeadGet("{id?}")]
+<#  if (UseODataQueryable) { #>
+        [EnableQuery]
+<#  } 
+    if (UseODataNotQueryable) { #>
+        public async Task<IActionResult> Get(ODataQueryOptions<<#=entity.Name#>> options, int? id = null)
+<#  } else { #>
         public async Task<IActionResult> Get(int? id = null)
+<#  } // if #>
         {
 <#  if (UseMediatr) { #>
-            var request = new GetRequest<<#=entity.Name#>>(id.GetValueOrDefault());
+            var request = new GetRequest<<#=entity.Name#>>(<#=UseODataNotQueryable ? "options, " : ""#>id.GetValueOrDefault());
             var response = await _mediator.Send(request);
 <#  } else { #>
-            var request = new Request<<#=entity.Name#>>(id.GetValueOrDefault());
+            var request = new Request<<#=entity.Name#>>(<#=UseODataNotQueryable ? "options, " : ""#>id.GetValueOrDefault());
             var response = await Handle(request);
 <#  } // if-else UseMediatr #>
-<#  if (UseOData && ResourceModel.Settings.Odata.Queryable) { #>
-            return Ok(response.Collection.AsQueryable());
-<#  } else { #>
-            return Ok(response.Collection);
-<#  } // if-else #>
+            return Ok(response.Results<#=UseODataQueryable ? ".AsQueryable()" : ""#>);
         }
 <# 
     if (ResourceModel.Relations.ContainsKey(entity.Name)) { 
@@ -147,26 +151,29 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
 #>
         
         [HttpHeadGet("{id}/<#=relation.SetName#>")]
+<#  if (UseODataQueryable) { #>
+        [EnableQuery]
+<#  } 
+    if (UseODataNotQueryable) { #>
+        public async Task<IActionResult> Get<#=relation.SetName#>(ODataQueryOptions<<#=relation.Name#>> options, int id)
+<#  } else { #>
         public async Task<IActionResult> Get<#=relation.SetName#>(int id)
+<#  } // if #>
         {
 <#    if (UseMediatr) { #>
-            var request = new GetRequest<<#=relation.Name#>>()
+            var request = new GetRequest<<#=relation.Name#>>(<#=UseODataNotQueryable ? "options" : ""#>)
             {
                 ParentId = new ResourceIdentifier(typeof(<#=entity.Name#>), id)
             };
             var response = await _mediator.Send(request);
 <#    } else { #>
-            var request = new Request<<#=relation.Name#>>()
+            var request = new Request<<#=relation.Name#>>(<#=UseODataNotQueryable ? "options" : ""#>)
             {
                 ParentId = new ResourceIdentifier(typeof(<#=entity.Name#>), id)
             };
             var response = await Handle(request);
 <#    } // if-else #>
-<#    if (UseOData && ResourceModel.Settings.Odata.Queryable) { #>
-            return Ok(response.Collection.AsQueryable());
-<#    } else { #>
-            return Ok(response.Collection);
-<#    } // if-else #>
+            return Ok(response.Results<#=UseODataQueryable ? ".AsQueryable()" : ""#>);
         }
 <#  }} // foreach-relation/if #>
     }
@@ -245,7 +252,7 @@ namespace <#=TargetNamespace#>
 <# } // if-UseMediatr #>
         where ResourceT : class
     {
-<# if (UseOData) { #>
+<# if (UseODataNotQueryable) { #>
         public Request(ODataQueryOptions<ResourceT> options, int id = 0)
             : base(id)
         {
@@ -261,7 +268,7 @@ namespace <#=TargetNamespace#>
 
     public partial class GetRequest<ResourceT> : Request<ResourceT> where ResourceT : class
     {
-<# if (UseOData) { #>
+<# if (UseODataNotQueryable) { #>
         public GetRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
 <# } else { #>
         public GetRequest(int id = 0) : base(id) { }
@@ -270,7 +277,7 @@ namespace <#=TargetNamespace#>
 
     public partial class PutRequest<ResourceT> : Request<ResourceT> where ResourceT : class
     {
-<# if (UseOData) { #>
+<# if (UseODataNotQueryable) { #>
         public PutRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
 <# } else { #>
         public PutRequest(int id = 0) : base(id) { }
@@ -279,7 +286,7 @@ namespace <#=TargetNamespace#>
 
     public partial class PatchRequest<ResourceT> : Request<ResourceT> where ResourceT : class
     {
-<# if (UseOData) { #>
+<# if (UseODataNotQueryable) { #>
         public PatchRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
 <# } else { #>
         public PatchRequest(int id = 0) : base(id) { }
@@ -288,7 +295,7 @@ namespace <#=TargetNamespace#>
 
     public partial class DeleteRequest<ResourceT> : Request<ResourceT> where ResourceT : class
     {
-<# if (UseOData) { #>
+<# if (UseODataNotQueryable) { #>
         public DeleteRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
 <# } else { #>
         public DeleteRequest(int id = 0) : base(id) { }
@@ -354,7 +361,7 @@ namespace <#=TargetNamespace#>
                 .Count()
 <#  } // if #>
 <#  if (ResourceModel.Settings.Odata.Max > 0) { #>
-                .MaxTop(100)
+                .MaxTop(<#=ResourceModel.Settings.Odata.Max#>)
 <#  } // if #>
                 ;
 <# } // if #>
@@ -405,5 +412,13 @@ private bool UseMediatr
 private bool UseOData
 {
     get { return ResourceModel?.Settings?.Odata != null; }
+}
+private bool UseODataQueryable
+{
+    get { return UseOData && ResourceModel.Settings.Odata.Queryable; }
+}
+private bool UseODataNotQueryable
+{
+    get { return UseOData && !ResourceModel.Settings.Odata.Queryable; }
 }
 #>

@@ -4,19 +4,16 @@ namespace NRestGen
 {
     public class Response<ResourceT>
     {
-        public Response()
-        { }
-
         public Response(IEnumerable<ResourceT> collection)
         {
-            Collection = collection;
+            Results = collection;
         }
 
         public Response(ResourceT instance)
         {
-            Collection = new[] { instance };
+            Results = new[] { instance };
         }
 
-        public IEnumerable<ResourceT> Collection { get; set; }
+        public IEnumerable<ResourceT> Results { get; set; }
     }
 }

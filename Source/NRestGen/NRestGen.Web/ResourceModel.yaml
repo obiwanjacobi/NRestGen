@@ -1,11 +1,11 @@
 ﻿settings:
-#  odata:
-#    queryable: true
-#    select: true
-#    filter: true
-#    expand: 1
-#    count: true
-#    max: 100
+  odata:
+    queryable: false
+    select: true
+    filter: true
+    expand: 1
+    count: true
+    max: 100
   mediatr:
     register_assembly: true
   api:
