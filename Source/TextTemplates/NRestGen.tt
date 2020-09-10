@@ -94,7 +94,6 @@ Generate <#=entity.Name#> Controller: <#=path#>
 #>
 <#  if (UseMediatr) { #>
 using MediatR;
-using NRestGen.Mediatr;
 <#  } // if #>
 <#  if (UseOData) { #>
 using Microsoft.AspNet.OData;
@@ -221,7 +220,7 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
   } // foreach-entity
 #>
 <# } // if-!UseMediatr #>
-<# path = BuildPath("Request.generated.cs"); #>
+`<# path = BuildPath("Request.generated.cs"); #>
 Generate Request class: <#=path#>
 <# 
     /*
