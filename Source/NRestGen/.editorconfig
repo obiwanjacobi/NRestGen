@@ -8,10 +8,12 @@ indent_style = space
 # Code files
 [*.{cs,csx,vb,vbx}]
 indent_size = 4
-[*.{yml,yaml}]
-indent_size = 2
 insert_final_newline = true
 charset = utf-8-bom
+[*.{yml,yaml}]
+indent_size = 2
+[*.{tt,ttinclude}]
+indent_size = 2
 ###############################
 # .NET Coding Conventions     #
 ###############################

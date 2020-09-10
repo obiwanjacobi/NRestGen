@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using NRestGen.Mediatr;
 using NRestGen.Web.ResourceModel;
 
 namespace NRestGen.Web.Handlers

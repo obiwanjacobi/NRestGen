@@ -29,12 +29,6 @@ namespace NRestGen.Tests
             return dir;
         }
 
-        public static string SolutionFolder
-        {
-            get
-            {
-                return new Uri(Path.Combine(BinDirectory, @"..\..\..\..\")).AbsolutePath;
-            }
-        }
+        public static string SolutionFolder => new Uri(Path.Combine(BinDirectory, @"..\..\..\..\")).AbsolutePath;
     }
 }

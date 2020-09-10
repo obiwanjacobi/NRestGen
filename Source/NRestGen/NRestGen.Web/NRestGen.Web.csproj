@@ -23,8 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NRestGen.Mediatr\NRestGen.Mediatr.csproj" />
-    <ProjectReference Include="..\NRestGen.TextTemplate\NRestGen.TextTemplate.csproj" />
+    <ProjectReference Include="..\NRestGen.TextTemplate\NRestGen.TextTemplate.csproj">
+      <!-- Make this a Build- and Design-Time only reference -->
+      <PrivateAssets>All</PrivateAssets>
+    </ProjectReference>
     <ProjectReference Include="..\NRestGen\NRestGen.csproj" />
   </ItemGroup>
 
@@ -42,10 +44,6 @@
 
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>

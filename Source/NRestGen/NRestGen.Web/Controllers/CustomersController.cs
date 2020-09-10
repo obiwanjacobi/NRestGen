@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using NRestGen.Web.ResourceModel;
 
 namespace NRestGen.Web.Controllers
@@ -15,7 +14,7 @@ namespace NRestGen.Web.Controllers
         {
             throw new NotImplementedException();
         }
-        
+
         public Task<Response<Order>> Handle(Request<Order> request)
         {
             throw new NotImplementedException();

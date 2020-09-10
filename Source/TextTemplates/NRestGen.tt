@@ -23,7 +23,11 @@
     var path = BuildPath("ResourceModel.generated.cs", ResourceModelNamespace);
 #>
 Generating Resource Model classes: <#=path#>
-<# 
+<#
+    /*
+     *  Resource Model
+     */
+
     MultiFile.StartNewFile(path);
 #>
 using System;
@@ -47,6 +51,10 @@ namespace <#=TargetNamespace#>.<#=ResourceModelNamespace#>
 #>
 Generate ResourceModelBuilder class: <#=path#>
 <# 
+    /*
+     * Resource Model Builder
+     */
+
     MultiFile.StartNewFile(path);
 #>
 using Microsoft.AspNet.OData.Builder;
@@ -76,8 +84,12 @@ namespace <#=TargetNamespace#>.<#=ResourceModelNamespace#>
 <# foreach (var entity in ResourceModel.Entities) { 
     path = BuildPath(entity.SetName + "Controller.generated.cs", ControllerNamespace);
 #>
-Generate Controller: <#=path#>
+Generate <#=entity.Name#> Controller: <#=path#>
 <# 
+    /*
+     *  Resource Controller
+     */
+
     MultiFile.StartNewFile(path);
 #>
 <#  if (UseMediatr) { #>
@@ -167,6 +179,11 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
 <# if (!UseMediatr) { #>
 <# foreach (var entity in ResourceModel.Entities) { 
     path = BuildPath(entity.SetName + "Controller.cs", ControllerNamespace);
+
+    /*
+     *  Resource Controller Implementation
+     */
+
     MultiFile.StartNewFile(path, FileCreationMode.NotExists);
 #>
 using Microsoft.AspNetCore.Mvc;
@@ -204,9 +221,92 @@ namespace <#=TargetNamespace#>.<#=ControllerNamespace#>
   } // foreach-entity
 #>
 <# } // if-!UseMediatr #>
+<# path = BuildPath("Request.generated.cs"); #>
+Generate Request class: <#=path#>
+<# 
+    /*
+     *  Request
+     */
+
+    MultiFile.StartNewFile(path);
+#>
+using System;
+<# if (UseMediatr) { #>
+using MediatR;
+<# } // if #>
+<# if (UseOData) { #>
+using Microsoft.AspNet.OData.Query;
+<# } // if #>
+
+namespace <#=TargetNamespace#>
+{
+    public <#= UseMediatr ? "abstract" : ""#> partial class Request<ResourceT> : NRestGen.Request<ResourceT>
+<# if (UseMediatr) { #>
+            , IRequest<NRestGen.Response<ResourceT>>
+<# } // if-UseMediatr #>
+        where ResourceT : class
+    {
+<# if (UseOData) { #>
+        public Request(ODataQueryOptions<ResourceT> options, int id = 0)
+            : base(id)
+        {
+            Options = options ?? throw new ArgumentNullException(nameof(options));
+        }
+
+        public ODataQueryOptions<ResourceT> Options { get; private set; }
+<# } else { #>
+        public Request(int id = 0) : base(id) { }
+<# } // if-UseOData #>
+    }
+<# if (UseMediatr) { #>
+
+    public partial class GetRequest<ResourceT> : Request<ResourceT> where ResourceT : class
+    {
+<# if (UseOData) { #>
+        public GetRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
+<# } else { #>
+        public GetRequest(int id = 0) : base(id) { }
+<# } // if-UseOData #>
+    }
+
+    public partial class PutRequest<ResourceT> : Request<ResourceT> where ResourceT : class
+    {
+<# if (UseOData) { #>
+        public PutRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
+<# } else { #>
+        public PutRequest(int id = 0) : base(id) { }
+<# } // if-UseOData #>
+    }
+
+    public partial class PatchRequest<ResourceT> : Request<ResourceT> where ResourceT : class
+    {
+<# if (UseOData) { #>
+        public PatchRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
+<# } else { #>
+        public PatchRequest(int id = 0) : base(id) { }
+<# } // if-UseOData #>
+    }
+
+    public partial class DeleteRequest<ResourceT> : Request<ResourceT> where ResourceT : class
+    {
+<# if (UseOData) { #>
+        public DeleteRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
+<# } else { #>
+        public DeleteRequest(int id = 0) : base(id) { }
+<# } // if-UseOData #>
+    }
+<# } // if-UseMediatr #>
+}
+<# 
+  MultiFile.EndBlock();
+#>
 <# path = BuildPath("Startup.generated.cs"); #>
 Generate StartupExtensions class: <#=path#>
 <# 
+    /*
+     *  Startup Extensions
+     */
+
     MultiFile.StartNewFile(path);
 #>
 <# if (UseMediatr) { #>
@@ -274,8 +374,30 @@ Error:
   Error(e.ToString());
   } 
 #>
-*******************************************/
 
+
+
+Use the NuGet Package Manager to install the following packages:
+----------------------------------------------------------------
+<#
+    if (UseMediatr) {
+#>
+
+Mediatr ----------------
+- Mediatr (Jimmy Bogard) >= v8.1.0
+- Mediatr.Extensions.Microsoft.DependencyInjection (Jimmy Bogard) >= v8.1.0
+<#
+    }
+    if (UseOData) {
+#>
+
+OData ------------------
+- Microsoft.AspNetCore.OData (Microsoft) >= v7.4.1
+<#
+    }
+#>
+
+*******************************************/
 <#+ 
 private bool UseMediatr
 {

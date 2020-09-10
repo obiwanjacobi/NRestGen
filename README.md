@@ -115,7 +115,11 @@ One-to-many and one-to-one links should be included (navigation properties in mo
 
 > Include these links in the body of the OPTIONS (verb) result?
 
-Also need to be able to include this in the response body or have another URI to access it - some admins disable the OPTIONS verb.
+> May need to be able to include this in the response body or have another URI to access it - some admins disable the OPTIONS verb.
+
+> Generate links to expanded/related data not in the current result set?: Return a link to Orders of a requested Customer.
+
+See also: https://tools.ietf.org/html/draft-kelly-json-hal-08
 
 ## Filters
 
@@ -167,7 +171,7 @@ Any good?
 - Navigation Depth (Controllers: uri paths)
 - Resources (not) available from root / Aggregates?
 - ResourceModel: Binary Properties that have to queried separately (partial responses?).
-- Target locations (Projects/Folders) -and naming- for Resource Model classes and Controller classes
+- Target locations (Projects/Folders) -and naming- for Resource Model, Controller and Request classes
 - Use Mediatr (on/off)
 - Enable OData (EnableQuery, ParseQueryString or Off)
 - Link table as response of OPTIONS

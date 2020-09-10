@@ -24,7 +24,9 @@ namespace NRestGen.TextTemplate
             foreach (var prop in srcEntity.Properties)
             {
                 if (NameIsEntityReference(srcEntity, prop.Name))
+                {
                     continue;
+                }
 
                 foreach (var entity in entities)
                 {

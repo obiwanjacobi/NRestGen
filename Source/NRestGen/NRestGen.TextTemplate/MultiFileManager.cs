@@ -51,7 +51,10 @@ namespace NRestGen.TextTemplate
         public void EndBlock()
         {
             if (CurrentBlock == null)
+            {
                 return;
+            }
+
             CurrentBlock.Length = template.Length - CurrentBlock.Start;
             files.Add(CurrentBlock);
             currentBlock = null;
@@ -68,11 +71,18 @@ namespace NRestGen.TextTemplate
                 {
                     String fileName = Path.Combine(outputPath, block.Name);
                     String content = String.Empty;
-                    if (block.InlcudeHeader) content = Header;
+                    if (block.InlcudeHeader)
+                    {
+                        content = Header;
+                    }
+
                     content += template.ToString(block.Start, block.Length);
 
                     if (CreateFile(block.FileMode, fileName, content))
+                    {
                         generatedFileNames.Add(fileName);
+                    }
+
                     template.Remove(block.Start, block.Length);
                 }
             }
@@ -115,15 +125,9 @@ namespace NRestGen.TextTemplate
             return String.Empty;
         }
 
-        public virtual String DefaultProjectNamespace
-        {
-            get { return String.Empty; }
-        }
+        public virtual String DefaultProjectNamespace => String.Empty;
 
-        public virtual String ProjectDirectory
-        {
-            get { return Path.GetDirectoryName(this.host.TemplateFile); }
-        }
+        public virtual String ProjectDirectory => Path.GetDirectoryName(this.host.TemplateFile);
 
         protected static bool IsFileContentDifferent(String fileName, String newContent)
         {
@@ -140,13 +144,19 @@ namespace NRestGen.TextTemplate
 
         private Block CurrentBlock
         {
-            get { return currentBlock; }
+            get => currentBlock;
             set
             {
                 if (CurrentBlock != null)
+                {
                     EndBlock();
+                }
+
                 if (value != null)
+                {
                     value.Start = template.Length;
+                }
+
                 currentBlock = value;
             }
         }
@@ -162,7 +172,11 @@ namespace NRestGen.TextTemplate
             {
                 get
                 {
-                    if (templateProjectItem == null) return String.Empty;
+                    if (templateProjectItem == null)
+                    {
+                        return String.Empty;
+                    }
+
                     return templateProjectItem.ContainingProject.Properties.Item("DefaultNamespace").Value.ToString();
                 }
             }
@@ -171,14 +185,22 @@ namespace NRestGen.TextTemplate
             {
                 get
                 {
-                    if (templateProjectItem == null) return base.ProjectDirectory;
+                    if (templateProjectItem == null)
+                    {
+                        return base.ProjectDirectory;
+                    }
+
                     return Path.GetDirectoryName(templateProjectItem.ContainingProject.FileName);
                 }
             }
 
             public override String GetCustomToolNamespace(string fileName)
             {
-                if (dte == null) return String.Empty;
+                if (dte == null)
+                {
+                    return String.Empty;
+                }
+
                 return dte.Solution.FindProjectItem(fileName).Properties.Item("CustomToolNamespace").Value.ToString();
             }
 
@@ -190,7 +212,9 @@ namespace NRestGen.TextTemplate
                 base.Process(split, sync);
 
                 if (sync && projectSyncAction != null)
+                {
                     projectSyncAction(generatedFileNames);
+                }
             }
 
             protected override bool CreateFileIfNotExists(String fileName, String content)
@@ -227,23 +251,36 @@ namespace NRestGen.TextTemplate
 
             private static void ProjectSync(EnvDTE.ProjectItem templateProjectItem, List<String> keepFileNames)
             {
-                if (templateProjectItem == null) return;
+                if (templateProjectItem == null)
+                {
+                    return;
+                }
 
                 var keepFileNameSet = new HashSet<String>(keepFileNames);
                 var projectFiles = new Dictionary<String, EnvDTE.ProjectItem>();
                 var originalFilePrefix = Path.GetFileNameWithoutExtension(templateProjectItem.FileNames[0]) + ".";
                 foreach (EnvDTE.ProjectItem projectItem in templateProjectItem.ProjectItems)
+                {
                     projectFiles.Add(projectItem.FileNames[0], projectItem);
+                }
 
                 // Remove unused items from the project
                 foreach (var pair in projectFiles)
+                {
                     if (!keepFileNames.Contains(pair.Key) && !(Path.GetFileNameWithoutExtension(pair.Key) + ".").StartsWith(originalFilePrefix))
+                    {
                         pair.Value.Delete();
+                    }
+                }
 
                 // Add missing files to the project
                 foreach (String fileName in keepFileNameSet)
+                {
                     if (!projectFiles.ContainsKey(fileName))
+                    {
                         templateProjectItem.ProjectItems.AddFromFile(fileName);
+                    }
+                }
             }
 
             private void CheckoutFileIfRequired(String fileName)
@@ -252,7 +289,9 @@ namespace NRestGen.TextTemplate
                 {
                     var sc = dte.SourceControl;
                     if (sc != null && sc.IsItemUnderSCC(fileName) && !sc.IsItemCheckedOut(fileName))
+                    {
                         checkOutAction.EndInvoke(checkOutAction.BeginInvoke(fileName, null, null));
+                    }
                 }
             }
         }
