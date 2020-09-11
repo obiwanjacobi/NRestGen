@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Xml;
 using Microsoft.AspNet.OData.Formatter;
@@ -115,7 +115,7 @@ namespace NRestGen.Web
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "NRestGen Demo API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "NRestGen Demo API v1.0");
                 //foreach (var description in provider.ApiVersionDescriptions)
                 //{
                 //    c.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
