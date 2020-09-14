@@ -1,0 +1,56 @@
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Runtime" #>
+<#@ assembly name="$(TargetDir)NRestGen.TextTemplate.dll" #>
+<#@ assembly name="EnvDTE"#>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="NRestGen.TextTemplate" #>
+<#+
+private void GenerateControllerHandlers(string controllerNamespace, string resourceModelNamespace)
+{
+
+    foreach (var entity in ResourceModel.Entities) { 
+    var path = BuildPath(entity.SetName + "Controller.cs", controllerNamespace);
+
+    /*
+     *  Resource Controller Implementation
+     */
+
+    MultiFile.StartNewFile(path, FileCreationMode.NotExists);
+#>
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using <#=TargetNamespace#>.<#=resourceModelNamespace#>;
+
+namespace <#=TargetNamespace#>.<#=controllerNamespace#>
+{
+    /// <summary>
+    /// Implementation of the <#=entity.Name#> controller handlers.
+    /// </summary>
+    public partial class <#=entity.SetName#>Controller : ControllerBase
+    {
+        private Task<Response<<#=entity.Name#>>> Handle(Request<<#=entity.Name#>> request, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+<#+ 
+    if (ResourceModel.Relations.ContainsKey(entity.Name)) { 
+    var relations = ResourceModel.Relations[entity.Name];
+    foreach(var relation in relations) {
+#>
+        
+        private Task<Response<<#=relation.Name#>>> Handle(Request<<#=relation.Name#>> request, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+<#+ }} // foreach/if #>
+    }
+}
+<#+ 
+  MultiFile.EndBlock();
+  } // foreach-entity
+}
+#>

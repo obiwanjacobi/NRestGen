@@ -1,0 +1,130 @@
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Runtime" #>
+<#@ assembly name="$(TargetDir)NRestGen.TextTemplate.dll" #>
+<#@ assembly name="EnvDTE"#>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="NRestGen.TextTemplate" #>
+<#+ 
+private void GenerateControllers(string controllerNamespace, string resourceModelNamespace)
+{
+    foreach (var entity in ResourceModel.Entities) { 
+    var path = BuildPath(entity.SetName + "Controller.generated.cs", controllerNamespace);
+#>
+Generate <#=entity.Name#> Controller: <#=path#>
+<#+ 
+    /*
+     *  Resource Controller
+     */
+
+    MultiFile.StartNewFile(path);
+#>
+<#+  if (UseMediatr) { #>
+using MediatR;
+<#+  } // if #>
+<#+  if (UseOData) { #>
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Query;
+<#+  } // if #>
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using <#=TargetNamespace#>.<#=resourceModelNamespace#>;
+
+namespace <#=TargetNamespace#>.<#=controllerNamespace#>
+{
+    /// <summary>
+    /// Handles resource requests for the <#=entity.Name#> type.
+    /// </summary>
+    [ApiController]
+    [ApiVersion("<#=ResourceModel.Settings.Api.Version#>")]
+    //[Route("<#=ResourceModel.Settings.Api.BaseUrl#>/v{v:apiVersion}/[controller]")]
+    [Route("<#=ResourceModel.Settings.Api.BaseUrl#>/[controller]")]
+    public partial class <#=entity.SetName#>Controller : ControllerBase
+    {
+<#+  if (UseMediatr) { #>
+        private readonly IMediator _mediator;
+
+        public <#=entity.SetName#>Controller(IMediator mediator)
+        {
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        }
+<#+  } // if #>
+
+        [HttpHeadGet("{id?}")]
+<#+  if (UseODataQueryable) { #>
+        [EnableQuery]
+<#+  } 
+    if (UseODataNotQueryable) { #>
+        public async Task<IActionResult> Get(CancellationToken cancellationToken, ODataQueryOptions<<#=entity.Name#>> options, int? id = null)
+<#+  } else { #>
+        public async Task<IActionResult> Get(CancellationToken cancellationToken, int? id = null)
+<#+  } // if #>
+        {
+<#+  if (UseMediatr) { #>
+            var request = new GetRequest<<#=entity.Name#>>(<#=UseODataNotQueryable ? "options, " : ""#>id.GetValueOrDefault())
+            {
+                Context = NewRequestContext()
+            };
+            var response = await _mediator.Send(request, cancellationToken);
+<#+  } else { #>
+            var request = new Request<<#=entity.Name#>>(<#=UseODataNotQueryable ? "options, " : ""#>id.GetValueOrDefault())
+            {
+                Context = NewRequestContext()
+            };
+            var response = await Handle(request, cancellationToken);
+<#+  } // if-else UseMediatr #>
+<#+  if (UseODataQueryable) { #>
+            return Ok(response.Results.AsQueryable());
+<#+  } else { #>
+            return Ok(response);
+<#+  } // if #>
+        }
+<#+ 
+    if (ResourceModel.Relations.ContainsKey(entity.Name)) { 
+    var relations = ResourceModel.Relations[entity.Name];
+    foreach(var relation in relations) {
+#>
+        
+        [HttpHeadGet("{id}/<#=relation.SetName#>")]
+<#+  if (UseODataQueryable) { #>
+        [EnableQuery]
+<#+  } 
+    if (UseODataNotQueryable) { #>
+        public async Task<IActionResult> Get<#=relation.SetName#>(CancellationToken cancellationToken, ODataQueryOptions<<#=relation.Name#>> options, int id)
+<#+  } else { #>
+        public async Task<IActionResult> Get<#=relation.SetName#>(CancellationToken cancellationToken, int id)
+<#+  } // if #>
+        {
+<#+    if (UseMediatr) { #>
+            var request = new GetRequest<<#=relation.Name#>>(<#=UseODataNotQueryable ? "options" : ""#>)
+            {
+                ParentId = new ResourceIdentifier(typeof(<#=entity.Name#>), id),
+                Context = NewRequestContext()
+            };
+            var response = await _mediator.Send(request, cancellationToken);
+<#+    } else { #>
+            var request = new Request<<#=relation.Name#>>(<#=UseODataNotQueryable ? "options" : ""#>)
+            {
+                ParentId = new ResourceIdentifier(typeof(<#=entity.Name#>), id),
+                Context = NewRequestContext()
+            };
+            var response = await Handle(request, cancellationToken);
+<#+    } // if-else #>
+            return Ok(response.Results<#=UseODataQueryable ? ".AsQueryable()" : ""#>);
+        }
+<#+  }} // foreach-relation/if #>
+
+        private RequestContext NewRequestContext()
+        {
+            return new RequestContext(Request.Method, Request.Path, Request.QueryString.Value);
+        }
+    }
+}
+<#+ 
+  MultiFile.EndBlock();
+  } // foreach-entity
+}
+#>

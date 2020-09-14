@@ -1,0 +1,40 @@
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Runtime" #>
+<#@ assembly name="$(TargetDir)NRestGen.TextTemplate.dll" #>
+<#@ assembly name="EnvDTE"#>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="NRestGen.TextTemplate" #>
+<#+
+private void GenerateResourceModel(string resourceModelNamespace)
+{
+    var path = BuildPath("ResourceModel.generated.cs", resourceModelNamespace);
+#>
+Generating Resource Model classes: <#=path#>
+<#+
+    /*
+     *  Resource Model
+     */
+
+    MultiFile.StartNewFile(path);
+#>
+using NRestGen;
+using System;
+using System.Collections.Generic;
+
+namespace <#=TargetNamespace#>.<#=resourceModelNamespace#>
+{
+<#+ foreach (var entity in ResourceModel.Entities) { #>
+    public partial class <#=entity.Name#> : Entity
+    {
+<#+ foreach(var prop in entity.Properties) { #>
+        public <#=prop.Type#> <#=prop.Name#> { get; set; }
+<#+ } // foreach-prop #>
+    }
+
+<#+ } // foreach-entity #>
+}
+<#+
+    MultiFile.EndBlock();
+} 
+#>

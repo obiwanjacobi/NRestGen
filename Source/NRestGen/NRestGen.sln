@@ -15,6 +15,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TextTemplates", "TextTemplates", "{8F3418E9-ABA4-4BFF-B7C6-99CE148C8FD2}"
 	ProjectSection(SolutionItems) = preProject
+		..\TextTemplates\NRestGen.Controllers.Handlers.ttinclude = ..\TextTemplates\NRestGen.Controllers.Handlers.ttinclude
+		..\TextTemplates\NRestGen.Controllers.ttinclude = ..\TextTemplates\NRestGen.Controllers.ttinclude
+		..\TextTemplates\NRestGen.Request.ttinclude = ..\TextTemplates\NRestGen.Request.ttinclude
+		..\TextTemplates\NRestGen.ResourceModel.ttinclude = ..\TextTemplates\NRestGen.ResourceModel.ttinclude
+		..\TextTemplates\NRestGen.ResourceModelBuilder.ttinclude = ..\TextTemplates\NRestGen.ResourceModelBuilder.ttinclude
+		..\TextTemplates\NRestGen.Startup.ttinclude = ..\TextTemplates\NRestGen.Startup.ttinclude
 		..\TextTemplates\NRestGen.tt = ..\TextTemplates\NRestGen.tt
 	EndProjectSection
 EndProject

@@ -1,0 +1,99 @@
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Runtime" #>
+<#@ assembly name="$(TargetDir)NRestGen.TextTemplate.dll" #>
+<#@ assembly name="EnvDTE"#>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="NRestGen.TextTemplate" #>
+<#+
+private void GenerateRequest() {
+    var path = BuildPath("Request.generated.cs");
+#>
+Generate Request class: <#=path#>
+<#+ 
+    /*
+     *  Request
+     */
+
+    MultiFile.StartNewFile(path);
+#>
+using System;
+<#+ if (UseMediatr) { #>
+using MediatR;
+<#+ } // if #>
+<#+ if (UseOData) { #>
+using Microsoft.AspNet.OData.Query;
+<#+ } // if #>
+
+namespace <#=TargetNamespace#>
+{
+    public <#= UseMediatr ? "abstract" : ""#> partial class Request<ResourceT> : NRestGen.Request<ResourceT>
+<#+ if (UseMediatr) { #>
+            , IRequest<NRestGen.Response<ResourceT>>
+<#+ } // if-UseMediatr #>
+        where ResourceT : class
+    {
+<#+ if (UseODataNotQueryable) { #>
+        public Request(ODataQueryOptions<ResourceT> options, int id = 0)
+            : base(id)
+        {
+            Options = options ?? throw new ArgumentNullException(nameof(options));
+        }
+
+        public ODataQueryOptions<ResourceT> Options { get; private set; }
+<#+ } else { #>
+        public Request(int id = 0) : base(id) { }
+<#+ } // if-UseOData #>
+    }
+<#+ if (UseMediatr) { #>
+
+    public partial class GetRequest<ResourceT> : Request<ResourceT> where ResourceT : class
+    {
+<#+ if (UseODataNotQueryable) { #>
+        public GetRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
+<#+ } else { #>
+        public GetRequest(int id = 0) : base(id) { }
+<#+ } // if-UseOData #>
+    }
+
+    public partial class PutRequest<ResourceT> : Request<ResourceT> where ResourceT : class
+    {
+<#+ if (UseODataNotQueryable) { #>
+        public PutRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
+<#+ } else { #>
+        public PutRequest(int id = 0) : base(id) { }
+<#+ } // if-UseOData #>
+    }
+
+    public partial class PatchRequest<ResourceT> : Request<ResourceT> where ResourceT : class
+    {
+<#+ if (UseODataNotQueryable) { #>
+        public PatchRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
+<#+ } else { #>
+        public PatchRequest(int id = 0) : base(id) { }
+<#+ } // if-UseOData #>
+    }
+
+    public partial class PostRequest<ResourceT> : Request<ResourceT> where ResourceT : class
+    {
+<#+ if (UseODataNotQueryable) { #>
+        public PostRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
+<#+ } else { #>
+        public PostRequest(int id = 0) : base(id) { }
+<#+ } // if-UseOData #>
+    }
+
+    public partial class DeleteRequest<ResourceT> : Request<ResourceT> where ResourceT : class
+    {
+<#+ if (UseODataNotQueryable) { #>
+        public DeleteRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
+<#+ } else { #>
+        public DeleteRequest(int id = 0) : base(id) { }
+<#+ } // if-UseOData #>
+    }
+<#+ } // if-UseMediatr #>
+}
+<#+ 
+  MultiFile.EndBlock();
+}
+#>

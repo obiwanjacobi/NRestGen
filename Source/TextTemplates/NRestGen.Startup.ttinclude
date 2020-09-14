@@ -1,0 +1,71 @@
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Runtime" #>
+<#@ assembly name="$(TargetDir)NRestGen.TextTemplate.dll" #>
+<#@ assembly name="EnvDTE"#>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="NRestGen.TextTemplate" #>
+<#+
+private void GenerateStartupExtensions(string resourceModelNamespace) {
+
+    var path = BuildPath("Startup.generated.cs"); #>
+Generate StartupExtensions class: <#=path#>
+<#+ 
+    MultiFile.StartNewFile(path);
+
+    if (UseMediatr) { #>
+using MediatR;
+<#+ } // if #>
+<#+ if (UseOData) { #>
+using Microsoft.AspNet.OData.Extensions;
+using <#=TargetNamespace#>.<#=resourceModelNamespace#>;
+<#+ } // if #>
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace <#=TargetNamespace#>
+{
+    public static class StartupExtensions
+    {
+        public static IServiceCollection AddNRestGen(this IServiceCollection services)
+        {
+<#+ if (UseMediatr &&
+       ResourceModel.Settings.Mediatr.RegisterAssembly) { #>
+            services.AddMediatR(typeof(Startup).Assembly);
+<#+ } // if #>
+<#+ if (UseOData) { #>
+            services.AddOData();
+<#+ } // if #>
+            return services;
+        }
+
+        public static IEndpointRouteBuilder AddNRestGen(this IEndpointRouteBuilder endpoints)
+        {
+<#+ if (UseOData) { #>
+            var resourceModel = ResourceModelBuilder.Build();
+            endpoints.MapODataRoute("OData", "<#=ResourceModel.Settings.Api.BaseUrl#>", resourceModel);
+            endpoints.EnableDependencyInjection();
+            endpoints
+<#+  if (ResourceModel.Settings.Odata.Select) { #>
+                .Select()
+<#+  } // if #>
+<#+  if (ResourceModel.Settings.Odata.Sort) { #>
+                .OrderBy()
+<#+  } // if #>
+<#+  if (ResourceModel.Settings.Odata.Filter) { #>
+                .Filter()
+<#+  } // if #>
+<#+  if (ResourceModel.Settings.Odata.Count) { #>
+                .Count()
+<#+  } // if #>
+<#+  if (ResourceModel.Settings.Odata.Max > 0) { #>
+                .MaxTop(<#=ResourceModel.Settings.Odata.Max#>)
+<#+  } // if #>
+                ;
+<#+ } // if #>
+            return endpoints;
+        }
+    }
+}
+<#+  MultiFile.EndBlock();
+} #>

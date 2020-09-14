@@ -40,6 +40,24 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>NRestGen.log</LastGenOutput>
     </None>
+    <None Include="..\..\TextTemplates\NRestGen.ResourceModel.ttinclude">
+      <DependentUpon>NRestGen.tt</DependentUpon>
+    </None>
+    <None Include="..\..\TextTemplates\NRestGen.ResourceModelBuilder.ttinclude">
+      <DependentUpon>NRestGen.tt</DependentUpon>
+    </None>
+    <None Include="..\..\TextTemplates\NRestGen.Controllers.ttinclude">
+      <DependentUpon>NRestGen.tt</DependentUpon>
+    </None>
+    <None Include="..\..\TextTemplates\NRestGen.Controllers.Handlers.ttinclude">
+      <DependentUpon>NRestGen.tt</DependentUpon>
+    </None>
+    <None Include="..\..\TextTemplates\NRestGen.Request.ttinclude">
+      <DependentUpon>NRestGen.tt</DependentUpon>
+    </None>
+    <None Include="..\..\TextTemplates\NRestGen.Startup.ttinclude">
+      <DependentUpon>NRestGen.tt</DependentUpon>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -47,7 +65,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <Folder Include="ResourceModel\" />
   </ItemGroup>
 
 </Project>
