@@ -6,7 +6,9 @@
 <#@ import namespace="System.IO" #>
 <#@ import namespace="NRestGen.TextTemplate" #>
 <#+
-private void GenerateStartupExtensions(string resourceModelNamespace) {
+private void GenerateStartupExtensions()
+{
+    string resourceModelNamespace = ResourceModel.Settings.Project.ResourceModel;
 
     var path = BuildPath("Startup.generated.cs"); #>
 Generate StartupExtensions class: <#=path#>

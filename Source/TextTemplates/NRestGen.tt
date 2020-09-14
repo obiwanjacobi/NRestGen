@@ -20,21 +20,19 @@
 
     // change this if your file name is different.
     const string ResourceModelFileName = "ResourceModel.yaml";
-    const string ResourceModelNamespace = "ResourceModel";
-    const string ControllerNamespace = "Controllers";
 
   try {
     var dte = GetDevEnv(Host);
     Initialize(dte, Host, ResourceModelFileName);
 #>
-<# GenerateResourceModel(ResourceModelNamespace); #>
-<# GenerateResourceModelBuilder(ResourceModelNamespace); #>
-<# GenerateControllers(ControllerNamespace, ResourceModelNamespace); #>
+<# GenerateResourceModel(); #>
+<# GenerateResourceModelBuilder(); #>
+<# GenerateControllers(); #>
 <# if (!UseMediatr) {
-      GenerateControllerHandlers(ControllerNamespace, ResourceModelNamespace);
+      GenerateControllerHandlers();
    } // if-!UseMediatr #>
 <# GenerateRequest(); #>
-<# GenerateStartupExtensions(ResourceModelNamespace); #>
+<# GenerateStartupExtensions(); #>
 <# Process(); #>
 <# } catch(Exception e) { #>
 Error:

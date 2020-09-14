@@ -6,8 +6,10 @@
 <#@ import namespace="System.IO" #>
 <#@ import namespace="NRestGen.TextTemplate" #>
 <#+
-private void GenerateResourceModel(string resourceModelNamespace)
+private void GenerateResourceModel()
 {
+    string resourceModelNamespace = ResourceModel.Settings.Project.ResourceModel;
+
     var path = BuildPath("ResourceModel.generated.cs", resourceModelNamespace);
 #>
 Generating Resource Model classes: <#=path#>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
@@ -32,6 +32,9 @@ namespace NRestGen.TextTemplate.Tests
 
             rescObj.Settings.Api.BaseUrl.Should().Be("api");
             rescObj.Settings.Api.Version.Should().Be("1");
+
+            rescObj.Settings.Project.Controllers.Should().Be("Controllers");
+            rescObj.Settings.Project.ResourceModel.Should().Be("ResourceModel");
         }
 
         [TestMethod]

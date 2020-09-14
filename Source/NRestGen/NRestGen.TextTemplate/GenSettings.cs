@@ -2,6 +2,7 @@
 {
     public sealed class GenSettings
     {
+        public ProjectSettings Project { get; set; }
         public ApiSettings Api { get; set; }
 
         public ODataSettings Odata { get; set; }
@@ -27,6 +28,12 @@
         {
             public string Version { get; set; }
             public string BaseUrl { get; set; }
+        }
+
+        public class ProjectSettings
+        {
+            public string Controllers { get; set; }
+            public string ResourceModel { get; set; }
         }
     }
 }

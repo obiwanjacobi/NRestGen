@@ -11,6 +11,9 @@
   api:
     version: 1
     base_url: api
+  project:
+    controllers: Controllers
+    resource_model: ResourceModel
 entities:
   - name: Customer
     set_name: Customers

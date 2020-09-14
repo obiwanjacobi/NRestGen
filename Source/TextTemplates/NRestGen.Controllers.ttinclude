@@ -6,8 +6,11 @@
 <#@ import namespace="System.IO" #>
 <#@ import namespace="NRestGen.TextTemplate" #>
 <#+ 
-private void GenerateControllers(string controllerNamespace, string resourceModelNamespace)
+private void GenerateControllers()
 {
+    string controllerNamespace = ResourceModel.Settings.Project.Controllers;
+    string resourceModelNamespace = ResourceModel.Settings.Project.ResourceModel;
+
     foreach (var entity in ResourceModel.Entities) { 
     var path = BuildPath(entity.SetName + "Controller.generated.cs", controllerNamespace);
 #>
