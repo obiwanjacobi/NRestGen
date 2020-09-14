@@ -13,25 +13,23 @@ private void GenerateResourceModel()
     var path = BuildPath("ResourceModel.generated.cs", resourceModelNamespace);
 #>
 Generating Resource Model classes: <#=path#>
-<#+
-    /*
-     *  Resource Model
-     */
-
-    MultiFile.StartNewFile(path);
-#>
+<#+ MultiFile.StartNewFile(path); #>
 using NRestGen;
 using System;
 using System.Collections.Generic;
 
 namespace <#=TargetNamespace#>.<#=resourceModelNamespace#>
 {
-<#+ foreach (var entity in ResourceModel.Entities) { #>
+<#+ foreach (var entity in ResourceModel.Entities) 
+    { 
+#>
     public partial class <#=entity.Name#> : Entity
     {
-<#+ foreach(var prop in entity.Properties) { #>
+<#+     foreach(var prop in entity.Properties) 
+        { 
+#>
         public <#=prop.Type#> <#=prop.Name#> { get; set; }
-<#+ } // foreach-prop #>
+<#+     } // foreach-prop #>
     }
 
 <#+ } // foreach-entity #>

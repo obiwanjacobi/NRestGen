@@ -6,17 +6,12 @@
 <#@ import namespace="System.IO" #>
 <#@ import namespace="NRestGen.TextTemplate" #>
 <#+
-private void GenerateRequest() {
+private void GenerateRequest()
+{
     var path = BuildPath("Request.generated.cs");
 #>
 Generate Request class: <#=path#>
-<#+ 
-    /*
-     *  Request
-     */
-
-    MultiFile.StartNewFile(path);
-#>
+<#+ MultiFile.StartNewFile(path); #>
 using System;
 <#+ if (UseMediatr) { #>
 using MediatR;
@@ -49,51 +44,50 @@ namespace <#=TargetNamespace#>
 
     public partial class GetRequest<ResourceT> : Request<ResourceT> where ResourceT : class
     {
-<#+ if (UseODataNotQueryable) { #>
+<#+     if (UseODataNotQueryable) { #>
         public GetRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
-<#+ } else { #>
+<#+     } else { #>
         public GetRequest(int id = 0) : base(id) { }
-<#+ } // if-UseOData #>
+<#+     } // if-UseOData #>
     }
 
     public partial class PutRequest<ResourceT> : Request<ResourceT> where ResourceT : class
     {
-<#+ if (UseODataNotQueryable) { #>
+<#+     if (UseODataNotQueryable) { #>
         public PutRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
-<#+ } else { #>
+<#+     } else { #>
         public PutRequest(int id = 0) : base(id) { }
-<#+ } // if-UseOData #>
+<#+     } // if-UseOData #>
     }
 
     public partial class PatchRequest<ResourceT> : Request<ResourceT> where ResourceT : class
     {
-<#+ if (UseODataNotQueryable) { #>
+<#+     if (UseODataNotQueryable) { #>
         public PatchRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
-<#+ } else { #>
+<#+     } else { #>
         public PatchRequest(int id = 0) : base(id) { }
-<#+ } // if-UseOData #>
+<#+     } // if-UseOData #>
     }
 
     public partial class PostRequest<ResourceT> : Request<ResourceT> where ResourceT : class
     {
-<#+ if (UseODataNotQueryable) { #>
+<#+     if (UseODataNotQueryable) { #>
         public PostRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
-<#+ } else { #>
+<#+     } else { #>
         public PostRequest(int id = 0) : base(id) { }
-<#+ } // if-UseOData #>
+<#+     } // if-UseOData #>
     }
 
     public partial class DeleteRequest<ResourceT> : Request<ResourceT> where ResourceT : class
     {
-<#+ if (UseODataNotQueryable) { #>
+<#+     if (UseODataNotQueryable) { #>
         public DeleteRequest(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
-<#+ } else { #>
+<#+     } else { #>
         public DeleteRequest(int id = 0) : base(id) { }
-<#+ } // if-UseOData #>
+<#+     } // if-UseOData #>
     }
 <#+ } // if-UseMediatr #>
 }
 <#+ 
   MultiFile.EndBlock();
-}
-#>
+} #>

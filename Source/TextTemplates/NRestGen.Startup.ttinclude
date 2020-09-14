@@ -15,7 +15,9 @@ Generate StartupExtensions class: <#=path#>
 <#+ 
     MultiFile.StartNewFile(path);
 
-    if (UseMediatr) { #>
+    if (UseMediatr) 
+    {
+#>
 using MediatR;
 <#+ } // if #>
 <#+ if (UseOData) { #>
@@ -48,26 +50,26 @@ namespace <#=TargetNamespace#>
             endpoints.MapODataRoute("OData", "<#=ResourceModel.Settings.Api.BaseUrl#>", resourceModel);
             endpoints.EnableDependencyInjection();
             endpoints
-<#+  if (ResourceModel.Settings.Odata.Select) { #>
+<#+     if (ResourceModel.Settings.Odata.Select) { #>
                 .Select()
-<#+  } // if #>
-<#+  if (ResourceModel.Settings.Odata.Sort) { #>
+<#+     } // if #>
+<#+     if (ResourceModel.Settings.Odata.Sort) { #>
                 .OrderBy()
-<#+  } // if #>
-<#+  if (ResourceModel.Settings.Odata.Filter) { #>
+<#+     } // if #>
+<#+     if (ResourceModel.Settings.Odata.Filter) { #>
                 .Filter()
-<#+  } // if #>
-<#+  if (ResourceModel.Settings.Odata.Count) { #>
+<#+     } // if #>
+<#+     if (ResourceModel.Settings.Odata.Count) { #>
                 .Count()
-<#+  } // if #>
-<#+  if (ResourceModel.Settings.Odata.Max > 0) { #>
+<#+     } // if #>
+<#+     if (ResourceModel.Settings.Odata.Max > 0) { #>
                 .MaxTop(<#=ResourceModel.Settings.Odata.Max#>)
-<#+  } // if #>
+<#+     } // if #>
                 ;
 <#+ } // if #>
             return endpoints;
         }
     }
 }
-<#+  MultiFile.EndBlock();
+<#+ MultiFile.EndBlock();
 } #>

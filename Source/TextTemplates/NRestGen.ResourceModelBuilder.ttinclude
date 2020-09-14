@@ -13,13 +13,7 @@ private void GenerateResourceModelBuilder()
     var path = BuildPath("ResourceModelBuilder.generated.cs", resourceModelNamespace);
 #>
 Generate ResourceModelBuilder class: <#=path#>
-<#+ 
-    /*
-     * Resource Model Builder
-     */
-
-    MultiFile.StartNewFile(path);
-#>
+<#+ MultiFile.StartNewFile(path); #>
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 

@@ -11,14 +11,11 @@ private void GenerateControllerHandlers()
     string controllerNamespace = ResourceModel.Settings.Project.Controllers;
     string resourceModelNamespace = ResourceModel.Settings.Project.ResourceModel;
 
-    foreach (var entity in ResourceModel.Entities) { 
-    var path = BuildPath(entity.SetName + "Controller.cs", controllerNamespace);
+    foreach (var entity in ResourceModel.Entities)
+    { 
+        var path = BuildPath(entity.SetName + "Controller.cs", controllerNamespace);
 
-    /*
-     *  Resource Controller Implementation
-     */
-
-    MultiFile.StartNewFile(path, FileCreationMode.NotExists);
+        MultiFile.StartNewFile(path, FileCreationMode.NotExists);
 #>
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -39,20 +36,23 @@ namespace <#=TargetNamespace#>.<#=controllerNamespace#>
             throw new NotImplementedException();
         }
 <#+ 
-    if (ResourceModel.Relations.ContainsKey(entity.Name)) { 
-    var relations = ResourceModel.Relations[entity.Name];
-    foreach(var relation in relations) {
+        if (ResourceModel.Relations.ContainsKey(entity.Name)) 
+        { 
+            var relations = ResourceModel.Relations[entity.Name];
+            foreach(var relation in relations) 
+            {
 #>
         
         private Task<Response<<#=relation.Name#>>> Handle(Request<<#=relation.Name#>> request, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
-<#+ }} // foreach/if #>
+<#+         }
+        } // foreach/if #>
     }
 }
 <#+ 
-  MultiFile.EndBlock();
-  } // foreach-entity
+        MultiFile.EndBlock();
+    } // foreach-entity
 }
 #>
