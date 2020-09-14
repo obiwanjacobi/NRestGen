@@ -33,28 +33,45 @@ namespace NRestGen.Web.Handlers
                 CreateCustomer()
             };
 
+            // typically these vars will drive the (database) query.
+            var skip = request.Options?.Skip?.Value ?? 0;
+            var take = request.Options?.Top?.Value ?? Int32.MaxValue;
+            var count = (request.Options?.Count?.Value).GetValueOrDefault() ? (int?)customers.Count() : null;
+
+            var builder = new LinkTableBuilder()
+                .AddNextPage()
+                .AddPrevPage()
+                .AddGetSelf();
+
+            return Task.FromResult(
+                new Response<Customer>(customers.Skip(skip).Take(take), count)
+                {
+                    Links = builder.ToList()
+                }
+            );
+
             // this code can be made generic/reusable
             // preferably this knowledge should not be in the request handlers.
             // links should be added and on return their hrefs/urls should be assigned by the framework/controller.
             // that way the handler has no knowledge of the physical urls (and RequestContext!).
 
-            var skip = request.Options?.Skip?.Value ?? 0;
-            var take = request.Options?.Top?.Value ?? Int32.MaxValue;
-            var count = (request.Options?.Count?.Value).GetValueOrDefault() ? (int?)customers.Count() : null;
+            //var skip = request.Options?.Skip?.Value ?? 0;
+            //var take = request.Options?.Top?.Value ?? Int32.MaxValue;
+            //var count = (request.Options?.Count?.Value).GetValueOrDefault() ? (int?)customers.Count() : null;
 
-            var builder = new LinkBuilder(request.Context.Path, request.Context.Query);
+            //var builder = new LinkTableBuilder(request.Context.Path, request.Context.Query);
 
-            return Task.FromResult(
-                new Response<Customer>(customers.Skip(skip).Take(take), count)
-                {
-                    Links = new[]
-                    {
-                        builder.Self(),
-                        builder.PrevPage(skip, take),
-                        builder.NextPage(skip, take)
-                    }
-                }
-            );
+            //return Task.FromResult(
+            //    new Response<Customer>(customers.Skip(skip).Take(take), count)
+            //    {
+            //        Links = new[]
+            //        {
+            //            builder.Self(),
+            //            builder.PrevPage(skip, take),
+            //            builder.NextPage(skip, take)
+            //        }
+            //    }
+            //);
         }
 
         private static Customer CreateCustomer(int? id = null)
