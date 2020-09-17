@@ -2,9 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <TransformOnBuild>false</TransformOnBuild>
   </PropertyGroup>
   
@@ -23,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NRestGen.OData\NRestGen.OData.csproj" />
     <ProjectReference Include="..\NRestGen.TextTemplate\NRestGen.TextTemplate.csproj">
       <!-- Make this a Build- and Design-Time only reference -->
       <PrivateAssets>All</PrivateAssets>

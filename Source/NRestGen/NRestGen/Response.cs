@@ -3,6 +3,7 @@
 namespace NRestGen
 {
     public class Response<ResourceT>
+        where ResourceT : class
     {
         public Response(IEnumerable<ResourceT> collection, int? count = null)
         {

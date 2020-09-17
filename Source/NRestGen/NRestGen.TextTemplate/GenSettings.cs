@@ -21,6 +21,7 @@
 
         public class MediatrSettings
         {
+            // TODO: assembly-type name to register, empty is register this.project (Startup)
             public bool RegisterAssembly { get; set; }
         }
 

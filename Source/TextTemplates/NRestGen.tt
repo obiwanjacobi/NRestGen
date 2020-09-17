@@ -25,15 +25,15 @@
     var dte = GetDevEnv(Host);
     Initialize(dte, Host, ResourceModelFileName);
 #>
-<# GenerateResourceModel(); #>
-<# GenerateResourceModelBuilder(); #>
-<# GenerateControllers(); #>
-<# if (!UseMediatr) {
-      GenerateControllerHandlers();
-   } // if-!UseMediatr #>
-<# GenerateRequest(); #>
-<# GenerateStartupExtensions(); #>
-<# Process(); #>
+<#  GenerateResourceModel(); #>
+<#  GenerateResourceModelBuilder(); #>
+<#  GenerateControllers(); #>
+<#  if (!UseMediatr) {
+       GenerateControllerHandlers();
+    } // if-!UseMediatr #>
+<#  GenerateRequest(); #>
+<#  GenerateStartupExtensions(); #>
+<#  Process(); #>
 <# } catch(Exception e) { #>
 Error:
 <#=e.ToString()#>

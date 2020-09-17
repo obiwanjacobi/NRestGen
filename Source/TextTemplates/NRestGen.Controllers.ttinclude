@@ -23,6 +23,7 @@ Generate <#=entity.Name#> Controller: <#=path#>
 using MediatR;
 <#+     } // if #>
 <#+     if (UseOData) { #>
+using NRestGen.OData;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
 <#+     } // if #>
@@ -59,26 +60,23 @@ namespace <#=TargetNamespace#>.<#=controllerNamespace#>
 <#+     } 
         if (UseODataNotQueryable) { #>
         public async Task<IActionResult> Get(CancellationToken cancellationToken, ODataQueryOptions<<#=entity.Name#>> options, int? id = null)
+        {
+            //options.Validate(new ODataValidationSettings());
 <#+     } else { #>
         public async Task<IActionResult> Get(CancellationToken cancellationToken, int? id = null)
-<#+     } // if #>
         {
+<#+     } // if #>
 <#+     if (UseMediatr) { #>
-            var request = new GetRequest<<#=entity.Name#>>(<#=UseODataNotQueryable ? "options, " : ""#>id.GetValueOrDefault())
-            {
-                Context = NewRequestContext()
-            };
+            var request = new GetRequest<<#=entity.Name#>>(<#=UseODataNotQueryable ? "options, " : ""#>id.GetValueOrDefault());
             var response = await _mediator.Send(request, cancellationToken);
 <#+     } else { #>
-            var request = new Request<<#=entity.Name#>>(<#=UseODataNotQueryable ? "options, " : ""#>id.GetValueOrDefault())
-            {
-                Context = NewRequestContext()
-            };
+            var request = new Request<<#=entity.Name#>>(<#=UseODataNotQueryable ? "options, " : ""#>id.GetValueOrDefault());
             var response = await Handle(request, cancellationToken);
 <#+     } // if-else UseMediatr #>
 <#+     if (UseODataQueryable) { #>
             return Ok(response.Results.AsQueryable());
 <#+     } else { #>
+            ResolveLinks(options, response);
             return Ok(response);
 <#+     } // if #>
         }
@@ -96,33 +94,40 @@ namespace <#=TargetNamespace#>.<#=controllerNamespace#>
 <#+             } 
                 if (UseODataNotQueryable) { #>
         public async Task<IActionResult> Get<#=relation.SetName#>(CancellationToken cancellationToken, ODataQueryOptions<<#=relation.Name#>> options, int id)
+        {
+            //options.Validate(new ODataValidationSettings());
 <#+             } else { #>
         public async Task<IActionResult> Get<#=relation.SetName#>(CancellationToken cancellationToken, int id)
-<#+             } // if #>
         {
-<#+             if (UseMediatr) { #>
+<#+             } // if-else
+                if (UseMediatr) { #>
             var request = new GetRequest<<#=relation.Name#>>(<#=UseODataNotQueryable ? "options" : ""#>)
             {
                 ParentId = new ResourceIdentifier(typeof(<#=entity.Name#>), id),
-                Context = NewRequestContext()
             };
             var response = await _mediator.Send(request, cancellationToken);
 <#+             } else { #>
             var request = new Request<<#=relation.Name#>>(<#=UseODataNotQueryable ? "options" : ""#>)
             {
                 ParentId = new ResourceIdentifier(typeof(<#=entity.Name#>), id),
-                Context = NewRequestContext()
             };
             var response = await Handle(request, cancellationToken);
 <#+             } // if-else #>
-            return Ok(response.Results<#=UseODataQueryable ? ".AsQueryable()" : ""#>);
+<#+             if (UseODataQueryable) { #>
+            return Ok(response.Results.AsQueryable());
+<#+             } else { #>
+            ResolveLinks(options, response);
+            return Ok(response);
+<#+             } // if #>
         }
 <#+         }
         } // foreach-relation/if #>
 
-        private RequestContext NewRequestContext()
+        private void ResolveLinks<T>(ODataQueryOptions options, Response<T> response)
+            where T : class
         {
-            return new RequestContext(Request.Method, Request.Path, Request.QueryString.Value);
+            var resolver = new LinkTableResolver();
+            response.Links = resolver.Resolve(Request, options, response.Links);
         }
     }
 }

@@ -26,6 +26,7 @@ using <#=TargetNamespace#>.<#=resourceModelNamespace#>;
 <#+ } // if #>
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace <#=TargetNamespace#>
 {
@@ -49,7 +50,7 @@ namespace <#=TargetNamespace#>
             var resourceModel = ResourceModelBuilder.Build();
             endpoints.MapODataRoute("OData", "<#=ResourceModel.Settings.Api.BaseUrl#>", resourceModel);
             endpoints.EnableDependencyInjection();
-            endpoints
+            return endpoints
 <#+     if (ResourceModel.Settings.Odata.Select) { #>
                 .Select()
 <#+     } // if #>
@@ -67,7 +68,6 @@ namespace <#=TargetNamespace#>
 <#+     } // if #>
                 ;
 <#+ } // if #>
-            return endpoints;
         }
     }
 }

@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NRestGen.TextTemplate", "NR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NRestGen.TextTemplate.Tests", "NRestGen.TextTemplate.Tests\NRestGen.TextTemplate.Tests.csproj", "{9235D6CA-A115-45D5-B4F6-35E470ACD02F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NRestGen.OData", "NRestGen.OData\NRestGen.OData.csproj", "{1142AE55-AEE2-49DC-B6FE-F36A42C4DE3D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{9235D6CA-A115-45D5-B4F6-35E470ACD02F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9235D6CA-A115-45D5-B4F6-35E470ACD02F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9235D6CA-A115-45D5-B4F6-35E470ACD02F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1142AE55-AEE2-49DC-B6FE-F36A42C4DE3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1142AE55-AEE2-49DC-B6FE-F36A42C4DE3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1142AE55-AEE2-49DC-B6FE-F36A42C4DE3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1142AE55-AEE2-49DC-B6FE-F36A42C4DE3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

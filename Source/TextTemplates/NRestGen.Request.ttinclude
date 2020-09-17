@@ -22,20 +22,14 @@ using Microsoft.AspNet.OData.Query;
 
 namespace <#=TargetNamespace#>
 {
-    public <#= UseMediatr ? "abstract" : ""#> partial class Request<ResourceT> : NRestGen.Request<ResourceT>
+    public <#= UseMediatr ? "abstract " : ""#>partial class Request<ResourceT> : <#= UseODataNotQueryable ? "NRestGen.OData.ODataRequest<ResourceT>" : "NRestGen.Request<ResourceT>"#>
 <#+ if (UseMediatr) { #>
             , IRequest<NRestGen.Response<ResourceT>>
 <#+ } // if-UseMediatr #>
         where ResourceT : class
     {
 <#+ if (UseODataNotQueryable) { #>
-        public Request(ODataQueryOptions<ResourceT> options, int id = 0)
-            : base(id)
-        {
-            Options = options ?? throw new ArgumentNullException(nameof(options));
-        }
-
-        public ODataQueryOptions<ResourceT> Options { get; private set; }
+        public Request(ODataQueryOptions<ResourceT> options, int id = 0) : base(options, id) { }
 <#+ } else { #>
         public Request(int id = 0) : base(id) { }
 <#+ } // if-UseOData #>
