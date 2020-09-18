@@ -11,9 +11,14 @@ namespace NRestGen.Web.Handlers
     {
         public Task<Response<Customer>> Handle(GetRequest<Customer> request, CancellationToken cancellationToken)
         {
+            var builder = new LinkTableBuilder();
+
             if (request.Identifier.ResourceId > 0)
             {
-                return Task.FromResult(new Response<Customer>(CreateCustomer(request.Identifier.ResourceId)));
+                return Task.FromResult(new Response<Customer>(CreateCustomer(request.Identifier.ResourceId))
+                {
+                    Links = builder.AddGetSelf().ToList()
+                });
             }
 
             var customers = new[]
@@ -33,13 +38,19 @@ namespace NRestGen.Web.Handlers
                 CreateCustomer()
             };
 
+            if ((request.Options?.Skip?.Value).GetValueOrDefault() > 0)
+            {
+                builder.AddPrevPage();
+            }
+            if ((request.Options?.Top?.Value).GetValueOrDefault() > 0)
+            {
+                builder.AddNextPage();
+            }
+
             // typically these vars will drive the (database) query.
             var skip = request.Options?.Skip?.Value ?? 0;
             var take = request.Options?.Top?.Value ?? Int32.MaxValue;
             var count = (request.Options?.Count?.Value).GetValueOrDefault() ? (int?)customers.Count() : null;
-
-            var builder = new LinkTableBuilder()
-                .AddGetSelf();
 
             return Task.FromResult(new Response<Customer>(customers.Skip(skip).Take(take), count)
             {
