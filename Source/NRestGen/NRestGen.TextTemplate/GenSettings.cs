@@ -10,6 +10,7 @@
 
         public class ODataSettings
         {
+            // TODO: remove - use implicit for $select
             public bool Queryable { get; set; }
             public bool Select { get; set; }
             public bool Count { get; set; }
@@ -23,6 +24,7 @@
         {
             // TODO: assembly-type name to register, empty is register this.project (Startup)
             public bool RegisterAssembly { get; set; }
+            // TODO: request (per verb) and response types to use
         }
 
         public class ApiSettings

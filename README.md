@@ -30,6 +30,7 @@ TBD:
 - CancellationToken during Request processing.
 - OData
 https://github.com/OData/AspNetCoreOData/blob/master/sample/ODataRoutingSample/Startup.cs
+https://github.com/Microsoft/OpenApi.Net.OData
 
 ISSUES:
 - OData does not seem to like versioned paths!?
@@ -186,6 +187,10 @@ Any good?
 
 https://github.com/mulesoft-labs/raml-dotnet-tools/wiki
 https://github.com/RicoSuter/NSwag
+
+# Resources
+
+https://www.youtube.com/watch?v=Igh2KfwOT-Q
 
 ## Credits
 
